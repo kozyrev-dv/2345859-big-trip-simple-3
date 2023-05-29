@@ -3,7 +3,7 @@ import {createElement} from '../render.js';
 /**
  * @abstract
  */
-export default class View {
+export default class AbstractView {
 
   #template = null;
   #element = null;
