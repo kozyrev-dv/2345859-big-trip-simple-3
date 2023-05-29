@@ -1,12 +1,5 @@
 import AbstractView from '../framework/abstract-view';
-
-const SORT_HEADERS = {
-  'day': 'Day',
-  'event': 'Event',
-  'time': 'Time',
-  'price': 'Price',
-  'offer': 'Offers'
-};
+import { SORT_HEADERS } from '../moks/const';
 
 const createSortItemElement = (sortType) => `
   <div class="trip-sort__item  trip-sort__item--${sortType}">
