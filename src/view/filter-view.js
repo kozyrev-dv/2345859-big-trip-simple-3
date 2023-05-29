@@ -1,9 +1,14 @@
 import AbstractView from '../framework/abstract-view.js';
 
+const FILTER_HEADERS = {
+  'future': 'Future',
+  'everything': 'Everything'
+};
+
 const createFilterItemElement = (filter) =>
   `<div class="trip-filters__filter">
     <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future">
-    <label class="trip-filters__filter-label" for="filter-future">Future</label>
+    <label class="trip-filters__filter-label" for="filter-future">${FILTER_HEADERS[filter]}</label>
   </div>`;
 
 const createFilterTemplate = (filters) => {
