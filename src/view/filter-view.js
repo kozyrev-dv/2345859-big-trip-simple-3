@@ -1,4 +1,4 @@
-import AbstractView from './abstract-view.js';
+import AbstractView from '../framework/abstract-view.js';
 
 const createFilterItemElement = (filter) =>
   `<div class="trip-filters__filter">

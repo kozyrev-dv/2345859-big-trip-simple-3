@@ -1,4 +1,4 @@
-import {View} from './abstract-view.js';
+import AbstractView from '../framework/abstract-view';
 
 const createCreateFormViewTemplate = () => '';
 
@@ -6,10 +6,10 @@ const createCreateFormViewTemplate = () => '';
  * Create form view
  *
  * @class CreateFormView
- * @extends {View}
+ * @extends {AbstractView}
  */
 
-export default class CreateFormView extends View{
+export default class CreateFormView extends AbstractView{
 
   constructor() {
     super(createCreateFormViewTemplate());

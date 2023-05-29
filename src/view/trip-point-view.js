@@ -1,4 +1,4 @@
-import {View} from './abstract-view.js';
+import AbstractView from '../framework/abstract-view';
 
 const createTripPointTemplate = () => '';
 
@@ -6,10 +6,10 @@ const createTripPointTemplate = () => '';
  * Trip point view
  *
  * @class TripPointView
- * @extends {View}
+ * @extends {AbstractView}
  */
 
-export default class TripPointView extends View{
+export default class TripPointView extends AbstractView{
 
   constructor() {
     super(createTripPointTemplate());

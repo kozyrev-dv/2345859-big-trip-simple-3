@@ -9,6 +9,10 @@ export default class AbstractView {
   #element = null;
 
   constructor(template) {
+    if (template === null || template === undefined){
+      throw new Error('Can not contruct view without a template');
+    }
+
     this.#template = template;
     this.#element = createElement(this.#template);
   }
