@@ -1,4 +1,3 @@
-
 import {View} from './view.js';
 
 const createFilterTemplate = () => '';
