@@ -1,4 +1,4 @@
-import {View} from './view.js';
+import {View} from './abstract-view.js';
 
 const createSortElementTemplate = () => '';
 

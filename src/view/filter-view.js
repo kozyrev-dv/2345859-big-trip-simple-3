@@ -1,18 +1,31 @@
-import {View} from './view.js';
+import AbstractView from './abstract-view.js';
 
-const createFilterTemplate = () => '';
+const createFilterItemElement = (filter) =>
+  `<div class="trip-filters__filter">
+    <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future">
+    <label class="trip-filters__filter-label" for="filter-future">Future</label>
+  </div>`;
+
+const createFilterTemplate = (filters) => {
+  const filterItems = filters.map((filter) => createFilterItemElement(filter)).join('');
+
+  return `<form class="trip-filters" action="#" method="get">
+    ${filterItems}
+    <button class="visually-hidden" type="submit">Accept filter</button>
+  </form>`;
+};
 
 /**
  * Filter view
  *
  * @class FilterView
- * @extends {View}
+ * @extends {AbstractView}
  */
 
-export default class FilterView extends View{
+export default class FilterView extends AbstractView{
 
-  constructor() {
-    super(createFilterTemplate());
+  constructor(filters) {
+    super(createFilterTemplate(filters));
   }
 
 }
