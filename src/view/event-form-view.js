@@ -18,7 +18,7 @@ const createOfferSelectors = (currentTypeOffers, checkedOffers, id) => currentTy
 }).join('');
 
 const createTripPointFormViewTemplate = ({type, basePrice, dateFrom, dateTo, destination, id, offers}) => {
-  destination = offers; //FOR ELINT ONLY
+  destination = offers; //FOR ESLINT ONLY
   offers = destination;
   const typeActual = type || OFFER_TYPES[0];
   const dateFromActual = dateFrom || (dateFrom || dayjs()).format('DD/MM/YY HH:mm'); //19/03/19 00:00
