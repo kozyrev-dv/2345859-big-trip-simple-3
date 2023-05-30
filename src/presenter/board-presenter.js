@@ -1,6 +1,6 @@
 import { render } from '../render';
 import TripPointView from '../view/trip-point-view';
-import EventFormView from '../view/create-form-view';
+import EventFormView from '../view/event-form-view';
 import TripPointModel from '../model/trip-point-model';
 import { randomInt } from '../framework/utils/random-utils';
 
