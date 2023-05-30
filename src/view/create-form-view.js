@@ -153,7 +153,7 @@ const createTripPointFormViewTemplate = ({type, basePrice, dateFrom, dateTo, des
  * @extends {AbstractView}
  */
 
-export default class TripFormView extends AbstractView{
+export default class EventFormView extends AbstractView{
 
   #basePrice = null;
 

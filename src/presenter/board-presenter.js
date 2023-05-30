@@ -1,6 +1,6 @@
 import { render } from '../render';
 import TripPointView from '../view/trip-point-view';
-import TripFormView from '../view/create-form-view';
+import EventFormView from '../view/create-form-view';
 import TripPointModel from '../model/trip-point-model';
 import { randomInt } from '../framework/utils/random-utils';
 
@@ -14,7 +14,7 @@ export default class BoardPresenter {
 
   init() {
 
-    render(new TripFormView(TripPointModel.empty), this.#tripPointsContainer);
+    render(new EventFormView(TripPointModel.empty), this.#tripPointsContainer);
 
     for (const el of Array.from({length: Math.floor(Math.random() * 30) + 5}, () => new TripPointView(
       {
