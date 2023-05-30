@@ -1,6 +1,8 @@
-import { allOffers } from '../moks/const';
 import { render } from '../render';
 import TripPointView from '../view/trip-point-view';
+import TripFormView from '../view/create-form-view';
+import TripPointModel from '../model/trip-point-model';
+import { randomInt } from '../framework/utils/random-utils';
 
 export default class BoardPresenter {
 
@@ -11,9 +13,12 @@ export default class BoardPresenter {
   }
 
   init() {
+
+    render(new TripFormView(TripPointModel.empty), this.#tripPointsContainer);
+
     for (const el of Array.from({length: Math.floor(Math.random() * 30) + 5}, () => new TripPointView(
       {
-        'base_price': Math.floor(Math.random() * 1000) + 100,
+        'base_price': randomInt(1000, 100),
         'date_from': '2019-07-10T22:55:56.845Z',
         'date_to': '2019-07-11T11:22:13.375Z',
         'destination': [],
