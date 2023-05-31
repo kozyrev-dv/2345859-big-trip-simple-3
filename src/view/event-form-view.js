@@ -1,8 +1,12 @@
 import AbstractView from '../framework/abstract-view';
-import { OFFER_TYPES } from '../moks/const';
-import { OFFERS_BY_TYPES } from '../moks/offers-by-type';
+import { DESTINATIONS, OFFER_TYPES } from '../moks/const';
+import { OFFERS_BY_TYPES } from '../moks/offers-by-type-moks';
 import { uppercaseFirst } from '../framework/utils/string-utils';
 import dayjs from 'dayjs';
+
+const createDestinationOptions = () => DESTINATIONS.map((destination) =>
+  `<option value="${destination.name}"></option>`
+).join('');
 
 const createOfferSelectors = (currentTypeOffers, checkedOffers, id) => currentTypeOffers.map((offer) => {
   const isChecked = checkedOffers.includes(offer.id) ? 'checked' : '';
@@ -17,14 +21,14 @@ const createOfferSelectors = (currentTypeOffers, checkedOffers, id) => currentTy
     </div>`;
 }).join('');
 
-const createTripPointFormViewTemplate = ({type, basePrice, dateFrom, dateTo, destination, id, offers}) => {
+const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destination, id, offers, type) => {
   destination = offers; //FOR ESLINT ONLY
   offers = destination;
   const typeActual = type || OFFER_TYPES[0];
-  const dateFromActual = dateFrom || (dateFrom || dayjs()).format('DD/MM/YY HH:mm'); //19/03/19 00:00
+  const dateFromActual = (dateFrom || dayjs()).format('DD/MM/YY HH:mm'); //19/03/19 00:00
   const dateToActual = dateTo || ''; //19/03/19 00:00
   const currentTypeOffers = OFFERS_BY_TYPES.find((el) => el.type === typeActual).offers;
-  const price = basePrice || 1000;
+  const price = basePrice || '';
 
   return `
   <li class="trip-events__item">
@@ -95,9 +99,7 @@ const createTripPointFormViewTemplate = ({type, basePrice, dateFrom, dateTo, des
           </label>
           <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="Geneva" list="destination-list-1">
           <datalist id="destination-list-1">
-            <option value="Amsterdam"></option>
-            <option value="Geneva"></option>
-            <option value="Chamonix"></option>
+            ${createDestinationOptions()}
           </datalist>
         </div>
 
@@ -159,8 +161,8 @@ export default class EventFormView extends AbstractView{
 
   #basePrice = null;
 
-  constructor({basePrice, dateFrom, dateTo, destination, id, offers, type}) {
-    super(createTripPointFormViewTemplate({type, basePrice, dateFrom, dateTo, destination, id, offers}));
+  constructor(basePrice, dateFrom, dateTo, destination, id, offers, type) {
+    super(createTripPointFormViewTemplate(basePrice, dateFrom, dateTo, destination, id, offers, type));
     this.#basePrice = basePrice;
   }
 

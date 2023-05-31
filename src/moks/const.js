@@ -1,3 +1,4 @@
+import { randomString } from '../framework/utils/random-utils';
 
 const OFFER_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
@@ -14,11 +15,16 @@ const SORT_HEADERS = {
   'offer': 'Offers'
 };
 
-const allOffers = Array.from({length: 10}, (_, i) => (
-  {
-    'id' : i,
-    'title' : 'Upgrade to a business class',
-    'price' : Math.random() * 100
-  }));
+const DESTINATIONS = Array.from({length: 10}, (_, i) => ({
+  'id': i,
+  'description': randomString(20),
+  'name': randomString(10),
+  'pictures': [
+    {
+      'src': 'http://picsum.photos/300/200?r=0.0762563005163317',
+      'description': 'Chamonix parliament building'
+    }
+  ]
+}));
 
-export {OFFER_TYPES, FILTER_HEADERS, SORT_HEADERS,allOffers};
+export {OFFER_TYPES, FILTER_HEADERS, SORT_HEADERS, DESTINATIONS};

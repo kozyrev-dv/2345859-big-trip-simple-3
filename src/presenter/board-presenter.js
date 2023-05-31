@@ -1,8 +1,9 @@
 import { render } from '../render';
 import TripPointView from '../view/trip-point-view';
 import EventFormView from '../view/event-form-view';
-import TripPointModel from '../model/trip-point-model';
-import { randomInt } from '../framework/utils/random-utils';
+import { randomTripPoint } from '../moks/trip-point-moks';
+import { OFFERS_BY_TYPES } from '../moks/offers-by-type-moks';
+import { DESTINATIONS } from '../moks/const';
 
 export default class BoardPresenter {
 
@@ -14,19 +15,27 @@ export default class BoardPresenter {
 
   init() {
 
-    render(new EventFormView(TripPointModel.empty), this.#tripPointsContainer);
+    render(new EventFormView(), this.#tripPointsContainer);
 
-    for (const el of Array.from({length: Math.floor(Math.random() * 30) + 5}, () => new TripPointView(
-      {
-        'base_price': randomInt(1000, 100),
-        'date_from': '2019-07-10T22:55:56.845Z',
-        'date_to': '2019-07-11T11:22:13.375Z',
-        'destination': [],
-        'id': '0',
-        'offers': Array.from({length: Math.floor(Math.random() * 4)}, () => Math.floor(Math.random() * 9)),
-        'type': 'bus'
-      }
-    ))){
+    const tripPointViews = Array.from({length: Math.floor(Math.random() * 30) + 5}, () => {
+      const randTripPointModel = randomTripPoint();
+      const offersData = OFFERS_BY_TYPES.find((el) => el.type === randTripPointModel.type).offers.filter(
+        (offer) => randTripPointModel.offers.includes(offer.id)
+      );
+      const destinationData = DESTINATIONS[randTripPointModel.destination];
+
+      return new TripPointView(
+        randTripPointModel.basePrice,
+        randTripPointModel.dateFrom,
+        randTripPointModel.dateTo,
+        destinationData,
+        randTripPointModel.id,
+        offersData,
+        randTripPointModel.type
+      );
+    });
+
+    for (const el of tripPointViews){
       render(el, this.#tripPointsContainer);
     }
   }
