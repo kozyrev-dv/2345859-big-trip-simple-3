@@ -1,39 +1,26 @@
-export default class DestinationModel {
+import { randomString } from '../framework/utils/random-utils';
 
-  #name = null;
-  #description = null;
-  #pictures = null;
-  #id = null;
+export default class DestinationsModel {
 
-  constructor(id, name, description, pictures) {
-    this.#id = id;
-    this.#description = description;
-    this.#name = name;
-    this.#pictures = pictures;
+  #destinations = [];
+
+  constructor() {
+    this.#destinations = Array.from({length: 10}, (_, i) => ({
+      'id': i,
+      'description': randomString(20),
+      'name': randomString(10),
+      'pictures': [
+        {
+          'src': 'http://picsum.photos/300/200?r=0.0762563005163317',
+          'description': 'Chamonix parliament building'
+        }
+      ]
+    }));
   }
 
-  get id() {
-    return this.#id;
-  }
+  get = (index) => this.#destinations[index];
 
-  get name() {
-    return this.#name;
-  }
-
-  get description() {
-    return this.#description;
-  }
-
-  get pictures() {
-    return this.#pictures;
-  }
-
-  get destination() {
-    return {
-      'name' : this.#name,
-      'description' : this.#description,
-      'pictures' : this.#pictures
-    };
-  }
+  getByName = (name) => this.#destinations.find((dest) => dest.name === name);
+  getById = (id) => this.#destinations.find((dest) => dest.id === id);
 
 }

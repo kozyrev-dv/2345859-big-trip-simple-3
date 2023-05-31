@@ -14,7 +14,6 @@ export default class BoardPresenter {
   }
 
   init = () => {
-
     const randPointToEdit = randomTripPoint();
     let offersData = OFFERS_BY_TYPES.find((el) => el.type === randPointToEdit.type).offers.filter(
       (offer) => randPointToEdit.offers.includes(offer.id)
