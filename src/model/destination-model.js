@@ -18,9 +18,8 @@ export default class DestinationsModel {
     }));
   }
 
-  get = (index) => this.#destinations[index];
-
-  getByName = (name) => this.#destinations.find((dest) => dest.name === name);
-  getById = (id) => this.#destinations.find((dest) => dest.id === id);
+  get destinations() {
+    return this.#destinations;
+  }
 
 }
