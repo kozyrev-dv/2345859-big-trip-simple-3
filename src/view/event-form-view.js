@@ -4,31 +4,55 @@ import { OFFERS_BY_TYPES } from '../moks/offers-by-type-moks';
 import { uppercaseFirst } from '../framework/utils/string-utils';
 import dayjs from 'dayjs';
 
+const createDestinationPhotostape = (destination) => destination.pictures.map(
+  (picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
+).join('');
+
+const createDestinationDescriptionElement = (destination) => (destination) ? `
+  <section class="event__section  event__section--destination">
+    <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+    <p class="event__destination-description">${destination.description}</p>
+
+    <div class="event__photos-container">
+      <div class="event__photos-tape">
+        ${createDestinationPhotostape(destination)}
+      </div>
+    </div>
+  </section>
+` : '';
+
 const createDestinationOptions = () => DESTINATIONS.map((destination) =>
   `<option value="${destination.name}"></option>`
 ).join('');
 
-const createOfferSelectors = (currentTypeOffers, checkedOffers, id) => currentTypeOffers.map((offer) => {
-  const isChecked = checkedOffers.includes(offer.id) ? 'checked' : '';
-  return `
-    <div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.id}-${id}" type="checkbox" name="event-offer-${offer.id}" ${isChecked}>
-      <label class="event__offer-label" for="event-offer-${offer.id}-${id}">
-        <span class="event__offer-title">${offer.title}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offer.price}</span>
-      </label>
-    </div>`;
-}).join('');
+const createOfferSelectors = (currentTypeOffers, checkedOffers, id) => {
+  const isHidden = (currentTypeOffers.length === 0) ? 'visually-hidden' : '';
+  return ` <div class="event__available-offers ${isHidden}"> ${
+    currentTypeOffers.map((offer) => {
+      const isChecked = checkedOffers.includes(offer.id) ? 'checked' : '';
+      return `
+        <div class="event__offer-selector">
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.id}-${id}" type="checkbox" name="event-offer-${offer.id}" ${isChecked}>
+          <label class="event__offer-label" for="event-offer-${offer.id}-${id}">
+            <span class="event__offer-title">${offer.title}</span>
+            &plus;&euro;&nbsp;
+            <span class="event__offer-price">${offer.price}</span>
+          </label>
+        </div>`;
+    }).join('')
+  }
+  </div>`;
+};
+
 
 const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destination, id, offers, type) => {
-  destination = offers; //FOR ESLINT ONLY
-  offers = destination;
+
   const typeActual = type || OFFER_TYPES[0];
-  const dateFromActual = (dateFrom || dayjs()).format('DD/MM/YY HH:mm'); //19/03/19 00:00
-  const dateToActual = dateTo || ''; //19/03/19 00:00
+  const dateFromActual = dayjs(dateFrom).format('DD/MM/YY HH:mm'); //19/03/19 00:00
+  const dateToActual = dayjs(dateTo).format('DD/MM/YY HH:mm'); //19/03/19 00:00
   const currentTypeOffers = OFFERS_BY_TYPES.find((el) => el.type === typeActual).offers;
   const price = basePrice || '';
+  const checkedOffers = (offers) ? offers.map((offer) => offer.id) : [];
 
   return `
   <li class="trip-events__item">
@@ -97,7 +121,7 @@ const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destinatio
           <label class="event__label  event__type-output" for="event-destination-1">
             ${uppercaseFirst(typeActual)}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="Geneva" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${(destination) ? destination.name : ''}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${createDestinationOptions()}
           </datalist>
@@ -126,25 +150,11 @@ const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destinatio
         <section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-          <div class="event__available-offers">
-           ${createOfferSelectors(currentTypeOffers, [], id)}
-          </div>
+          ${createOfferSelectors(currentTypeOffers, checkedOffers, id)}
         </section>
 
-        <section class="event__section  event__section--destination">
-          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">Geneva is a city in Switzerland that lies at the southern tip of expansive Lac Léman (Lake Geneva). Surrounded by the Alps and Jura mountains, the city has views of dramatic Mont Blanc.</p>
+        ${createDestinationDescriptionElement(destination)}
 
-          <div class="event__photos-container">
-            <div class="event__photos-tape">
-              <img class="event__photo" src="img/photos/1.jpg" alt="Event photo">
-              <img class="event__photo" src="img/photos/2.jpg" alt="Event photo">
-              <img class="event__photo" src="img/photos/3.jpg" alt="Event photo">
-              <img class="event__photo" src="img/photos/4.jpg" alt="Event photo">
-              <img class="event__photo" src="img/photos/5.jpg" alt="Event photo">
-            </div>
-          </div>
-        </section>
       </section>
     </form>
     </li>`;

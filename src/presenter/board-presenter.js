@@ -15,14 +15,27 @@ export default class BoardPresenter {
 
   init() {
 
-    render(new EventFormView(), this.#tripPointsContainer);
+    const randPointToEdit = randomTripPoint();
+    let offersData = OFFERS_BY_TYPES.find((el) => el.type === randPointToEdit.type).offers.filter(
+      (offer) => randPointToEdit.offers.includes(offer.id)
+    );
+    let destinationData = DESTINATIONS[randPointToEdit.destination];
+    render(new EventFormView(
+      randPointToEdit.basePrice,
+      randPointToEdit.dateFrom,
+      randPointToEdit.dateTo,
+      destinationData,
+      randPointToEdit.id,
+      offersData,
+      randPointToEdit.type
+    ), this.#tripPointsContainer);
 
     const tripPointViews = Array.from({length: Math.floor(Math.random() * 30) + 5}, () => {
       const randTripPointModel = randomTripPoint();
-      const offersData = OFFERS_BY_TYPES.find((el) => el.type === randTripPointModel.type).offers.filter(
+      offersData = OFFERS_BY_TYPES.find((el) => el.type === randTripPointModel.type).offers.filter(
         (offer) => randTripPointModel.offers.includes(offer.id)
       );
-      const destinationData = DESTINATIONS[randTripPointModel.destination];
+      destinationData = DESTINATIONS[randTripPointModel.destination];
 
       return new TripPointView(
         randTripPointModel.basePrice,
