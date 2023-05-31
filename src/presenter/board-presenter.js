@@ -13,7 +13,7 @@ export default class BoardPresenter {
     this.#tripPointsContainer = tripPointsContainer;
   }
 
-  init() {
+  init = () => {
 
     const randPointToEdit = randomTripPoint();
     let offersData = OFFERS_BY_TYPES.find((el) => el.type === randPointToEdit.type).offers.filter(
@@ -51,6 +51,6 @@ export default class BoardPresenter {
     for (const el of tripPointViews){
       render(el, this.#tripPointsContainer);
     }
-  }
+  };
 
 }
