@@ -1,6 +1,5 @@
 import AbstractView from '../framework/abstract-view';
-import { DESTINATIONS, OFFER_TYPES } from '../moks/const';
-import { OFFERS_BY_TYPES } from '../moks/offers-by-type-moks';
+import { OFFER_TYPES } from '../moks/const';
 import { uppercaseFirst } from '../framework/utils/string-utils';
 import dayjs from 'dayjs';
 
@@ -21,7 +20,7 @@ const createDestinationDescriptionElement = (destination) => (destination) ? `
   </section>
 ` : '';
 
-const createDestinationOptions = () => DESTINATIONS.map((destination) =>
+const createDestinationOptions = (destinations) => destinations.map((destination) =>
   `<option value="${destination.name}"></option>`
 ).join('');
 
@@ -45,14 +44,21 @@ const createOfferSelectors = (currentTypeOffers, checkedOffers, id) => {
 };
 
 
-const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destination, id, offers, type) => {
+const createTripPointFormViewTemplate = (point, offersByType, destinations) => {
+  const actualPoint = point || {
+    'basePrice' : '',
+    'dateFrom' : undefined,
+    'dateTo' : undefined,
+    'destination': null,
+    'id': 0,
+    'offers': null,
+    'type': OFFER_TYPES[0]
+  };
+  const currentTypeOffers = offersByType.find((el) => el.type === actualPoint.type).offers;
 
-  const typeActual = type || OFFER_TYPES[0];
-  const dateFromActual = dayjs(dateFrom).format('DD/MM/YY HH:mm'); //19/03/19 00:00
-  const dateToActual = dayjs(dateTo).format('DD/MM/YY HH:mm'); //19/03/19 00:00
-  const currentTypeOffers = OFFERS_BY_TYPES.find((el) => el.type === typeActual).offers;
-  const price = basePrice || '';
-  const checkedOffers = (offers) ? offers.map((offer) => offer.id) : [];
+  const dateFromActual = dayjs(actualPoint.dateFrom).format('DD/MM/YY HH:mm'); //19/03/19 00:00
+  const dateToActual = dayjs(actualPoint.dateTo).format('DD/MM/YY HH:mm'); //19/03/19 00:00
+  const checkedOffersIds = (actualPoint.offers) ? actualPoint.offers.map((offer) => offer.id) : [];
 
   return `
   <li class="trip-events__item">
@@ -61,7 +67,7 @@ const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destinatio
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${typeActual}.png" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${actualPoint.type}.png" alt="Event type icon">
           </label>
           <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -119,11 +125,11 @@ const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destinatio
 
         <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-1">
-            ${uppercaseFirst(typeActual)}
+            ${uppercaseFirst(actualPoint.type)}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${(destination) ? destination.name : ''}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${(actualPoint.destination) ? destinations[actualPoint.destination].name : ''}" list="destination-list-1">
           <datalist id="destination-list-1">
-            ${createDestinationOptions()}
+            ${createDestinationOptions(destinations)}
           </datalist>
         </div>
 
@@ -140,7 +146,7 @@ const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destinatio
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${actualPoint.basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -150,10 +156,10 @@ const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destinatio
         <section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-          ${createOfferSelectors(currentTypeOffers, checkedOffers, id)}
+          ${createOfferSelectors(currentTypeOffers, checkedOffersIds, actualPoint.id)}
         </section>
 
-        ${createDestinationDescriptionElement(destination)}
+        ${createDestinationDescriptionElement(destinations[actualPoint.destination])}
 
       </section>
     </form>
@@ -169,11 +175,11 @@ const createTripPointFormViewTemplate = (basePrice, dateFrom, dateTo, destinatio
 
 export default class EventFormView extends AbstractView{
 
-  #basePrice = null;
+  #point = null;
 
-  constructor(basePrice, dateFrom, dateTo, destination, id, offers, type) {
-    super(createTripPointFormViewTemplate(basePrice, dateFrom, dateTo, destination, id, offers, type));
-    this.#basePrice = basePrice;
+  constructor(point, offersByType, destinations) {
+    super(createTripPointFormViewTemplate(point, offersByType, destinations));
+    this.#point = point;
   }
 
 }

@@ -9,7 +9,7 @@ export default class OffersModel {
   constructor() {
     this.#offersByType = Array.from(OFFER_TYPES, (type) => {
       const offers = Array.from(
-        {length: randomInt(5, 1)},
+        {length: randomInt(5, 2)},
         (_, index) => createOffer(index, randomString(10), randomInt(100, 10))
       );
       return {
@@ -19,6 +19,8 @@ export default class OffersModel {
     });
   }
 
-  getOffersByType = (type) => this.#offersByType.find((el) => el.type === type).offers;
-
+  getOffersOfType = (type) => this.#offersByType.find((el) => el.type === type).offers;
+  get getOffersByType() {
+    return this.#offersByType;
+  }
 }
