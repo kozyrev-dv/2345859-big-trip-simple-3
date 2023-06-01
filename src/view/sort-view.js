@@ -1,4 +1,4 @@
-import AbstractView from '../framework/abstract-view';
+import AbstractView from '../framework/view/abstract-view';
 import { SORT_HEADERS } from '../moks/const';
 
 const createSortItemElement = (sortType) => `
@@ -24,8 +24,15 @@ const createSortElementTemplate = (sortTypes) => {
 
 export default class SortView extends AbstractView{
 
+  #sortTypes = null;
+
   constructor(sortTypes) {
-    super(createSortElementTemplate(sortTypes));
+    super();
+    this.#sortTypes = sortTypes;
+  }
+
+  get template() {
+    return createSortElementTemplate(this.#sortTypes);
   }
 
 }
