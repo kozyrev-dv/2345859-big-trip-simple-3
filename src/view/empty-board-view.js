@@ -17,4 +17,4 @@ export default class EmptyBoardView extends AbstractView {
     super(createEmptyBoardViewTemplate());
   }
 
-};
+}
