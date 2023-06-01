@@ -24,5 +24,4 @@ export default class TripPointsModel {
   get tripPoints () {
     return this.#tripPoints;
   }
-
 }

@@ -190,4 +190,14 @@ export default class EventFormView extends AbstractView{
     return createTripPointFormViewTemplate(this.#point, this.#offersByType, this.#destinations);
   }
 
+  setOnSubmitHandler = (callback) => {
+    this._callback.submit = callback;
+    this.element.addEventListener('submit', this.#onSubmitHandler);
+  };
+
+  #onSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.submit();
+  };
+
 }

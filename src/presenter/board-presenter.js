@@ -52,25 +52,18 @@ export default class BoardPresenter {
         this.#offersModel.offersByType,
         this.#destinationsModel.destinations
       );
+
       this.#tripPointFormMap.set(tripPoint, {
         'point' : tripPointView,
         'form' : eventFormView
       });
 
-      tripPointView.element.querySelector('.event__rollup-btn').addEventListener('click', (evt) => {
-        evt.preventDefault();
-        replace(
-          this.#tripPointFormMap.get(tripPoint).point,
-          this.#tripPointFormMap.get(tripPoint).form
-        );
+      tripPointView.setOnClickHandler(() => {
+        replace(this.#tripPointFormMap.get(tripPoint).form, this.#tripPointFormMap.get(tripPoint).point);
       });
 
-      eventFormView.element.addEventListener('submit', (evt) => {
-        evt.preventDefault();
-        replace(
-          this.#tripPointFormMap.get(tripPoint).point,
-          this.#tripPointFormMap.get(tripPoint).form
-        );
+      eventFormView.setOnSubmitHandler(() => {
+        replace(this.#tripPointFormMap.get(tripPoint).point, this.#tripPointFormMap.get(tripPoint).form);
       });
 
       render(tripPointView, this.#tripPointsContainer);
