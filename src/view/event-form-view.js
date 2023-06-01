@@ -1,4 +1,4 @@
-import AbstractView from '../framework/abstract-view';
+import AbstractView from '../framework/view/abstract-view';
 import { OFFER_TYPES } from '../moks/const';
 import { uppercaseFirst } from '../framework/utils/string-utils';
 import dayjs from 'dayjs';
@@ -176,10 +176,28 @@ const createTripPointFormViewTemplate = (point, offersByType, destinations) => {
 export default class EventFormView extends AbstractView{
 
   #point = null;
+  #offersByType = null;
+  #destinations = null;
 
   constructor(point, offersByType, destinations) {
-    super(createTripPointFormViewTemplate(point, offersByType, destinations));
+    super();
     this.#point = point;
+    this.#offersByType = offersByType;
+    this.#destinations = destinations;
   }
+
+  get template() {
+    return createTripPointFormViewTemplate(this.#point, this.#offersByType, this.#destinations);
+  }
+
+  setOnSubmitHandler = (callback) => {
+    this._callback.submit = callback;
+    this.element.addEventListener('submit', this.#onSubmitHandler);
+  };
+
+  #onSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.submit();
+  };
 
 }

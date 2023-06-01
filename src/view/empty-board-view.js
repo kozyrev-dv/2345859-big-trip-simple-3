@@ -1,4 +1,4 @@
-import AbstractView from '../framework/abstract-view';
+import AbstractView from '../framework/view/abstract-view';
 
 const createEmptyBoardViewTemplate = () => `
   <p class="trip-events__msg">Click New Event to create your first point</p>
@@ -14,7 +14,11 @@ const createEmptyBoardViewTemplate = () => `
 export default class EmptyBoardView extends AbstractView {
 
   constructor() {
-    super(createEmptyBoardViewTemplate());
+    super();
+  }
+
+  get template() {
+    return createEmptyBoardViewTemplate();
   }
 
 }

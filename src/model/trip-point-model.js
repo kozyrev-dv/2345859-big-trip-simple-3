@@ -5,7 +5,7 @@ export default class TripPointsModel {
   #tripPoints = [];
 
   constructor() {
-    this.#tripPoints = Array.from({length: 0}, (_, index) => {
+    this.#tripPoints = Array.from({length: 20}, (_, index) => {
       const tripPoint = randomTripPoint(index);
       return {
         'basePrice' : tripPoint.base_price,
@@ -24,5 +24,4 @@ export default class TripPointsModel {
   get tripPoints () {
     return this.#tripPoints;
   }
-
 }

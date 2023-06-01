@@ -1,4 +1,4 @@
-import AbstractView from '../framework/abstract-view.js';
+import AbstractView from '../framework/view/abstract-view';
 import dayjs from 'dayjs';
 import { uppercaseFirst } from '../framework/utils/string-utils.js';
 
@@ -53,9 +53,28 @@ const createTripPointTemplate = (point, offersOfType, destination) => {
 export default class TripPointView extends AbstractView{
 
   #point = null;
+  #offersOfType = null;
+  #destination = null;
 
   constructor(point, offersOfType, destination) {
-    super(createTripPointTemplate(point, offersOfType, destination));
+    super();
     this.#point = point;
+    this.#offersOfType = offersOfType;
+    this.#destination = destination;
   }
+
+  get template() {
+    return createTripPointTemplate(this.#point, this.#offersOfType, this.#destination);
+  }
+
+  setOnClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#onClickHandler);
+  };
+
+  #onClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  };
+
 }

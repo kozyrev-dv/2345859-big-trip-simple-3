@@ -1,5 +1,5 @@
 import BoardPresenter from './presenter/board-presenter.js';
-import { render } from './render.js';
+import { render } from './framework/render.js';
 import FilterView from './view/filter-view.js';
 import SortView from './view/sort-view.js';
 

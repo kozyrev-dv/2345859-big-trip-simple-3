@@ -1,4 +1,4 @@
-import { render } from '../render';
+import { render, replace } from '../framework/render';
 import TripPointsView from '../view/trip-point-view';
 import TripPointsModel from '../model/trip-point-model';
 import OffersModel from '../model/offer-model';
@@ -52,25 +52,18 @@ export default class BoardPresenter {
         this.#offersModel.offersByType,
         this.#destinationsModel.destinations
       );
+
       this.#tripPointFormMap.set(tripPoint, {
         'point' : tripPointView,
         'form' : eventFormView
       });
 
-      tripPointView.element.querySelector('.event__rollup-btn').addEventListener('click', (evt) => {
-        evt.preventDefault();
-        this.#tripPointsContainer.replaceChild(
-          this.#tripPointFormMap.get(tripPoint).form.element,
-          this.#tripPointFormMap.get(tripPoint).point.element
-        );
+      tripPointView.setOnClickHandler(() => {
+        replace(this.#tripPointFormMap.get(tripPoint).form, this.#tripPointFormMap.get(tripPoint).point);
       });
 
-      eventFormView.element.addEventListener('submit', (evt) => {
-        evt.preventDefault();
-        this.#tripPointsContainer.replaceChild(
-          this.#tripPointFormMap.get(tripPoint).point.element,
-          this.#tripPointFormMap.get(tripPoint).form.element
-        );
+      eventFormView.setOnSubmitHandler(() => {
+        replace(this.#tripPointFormMap.get(tripPoint).point, this.#tripPointFormMap.get(tripPoint).form);
       });
 
       render(tripPointView, this.#tripPointsContainer);

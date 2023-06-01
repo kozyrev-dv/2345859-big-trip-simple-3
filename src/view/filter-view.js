@@ -1,4 +1,4 @@
-import AbstractView from '../framework/abstract-view.js';
+import AbstractView from '../framework/view/abstract-view';
 import { FILTER_HEADERS } from '../moks/const.js';
 
 const createFilterItemElement = (filter) =>
@@ -25,8 +25,15 @@ const createFilterTemplate = (filters) => {
 
 export default class FilterView extends AbstractView{
 
+  #filters = null;
+
   constructor(filters) {
-    super(createFilterTemplate(filters));
+    super();
+    this.#filters = filters;
+  }
+
+  get template() {
+    return createFilterTemplate(this.#filters);
   }
 
 }
