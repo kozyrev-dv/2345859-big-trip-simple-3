@@ -4,6 +4,7 @@ import TripPointsModel from '../model/trip-point-model';
 import OffersModel from '../model/offer-model';
 import DestinationsModel from '../model/destination-model';
 import EventFormView from '../view/event-form-view';
+import EmptyBoardView from '../view/empty-board-view';
 
 export default class BoardPresenter {
 
@@ -33,6 +34,11 @@ export default class BoardPresenter {
     //   this.#offersModel.getOffersByType,
     //   this.#destinationsModel.destinations
     // ), this.#tripPointsContainer);
+
+    if(this.#tripPointsModel.tripPoints.length === 0) {
+      render(new EmptyBoardView(), this.#tripPointsContainer);
+      return;
+    }
 
     for (const tripPoint of this.#tripPointsModel.tripPoints) {
 
