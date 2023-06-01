@@ -36,8 +36,8 @@ export default class AbstractView {
     this.#element = value;
   }
 
-  removeElement() {
+  removeElement = () => {
     this._element = null;
-  }
+  };
 
 }

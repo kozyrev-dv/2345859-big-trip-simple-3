@@ -1,25 +1,26 @@
+import { OFFER_TYPES } from '../moks/const';
+import { randomInt, randomString } from '../framework/utils/random-utils';
+import { createOffer } from '../moks/offers-by-type-moks';
 
-export default class OfferModel {
+export default class OffersModel {
 
-  #id = null;
-  #price = null;
-  #title = null;
+  #offersByType = [];
 
-  constructor(id, price, title) {
-    this.#id = id;
-    this.#price = price;
-    this.#title = title;
+  constructor() {
+    this.#offersByType = Array.from(OFFER_TYPES, (type) => {
+      const offers = Array.from(
+        {length: randomInt(5, 2)},
+        (_, index) => createOffer(index, randomString(10), randomInt(100, 10))
+      );
+      return {
+        'type': type,
+        'offers': offers
+      };
+    });
   }
 
-  get id() {
-    return this.#id();
-  }
-
-  get price() {
-    return this.#price;
-  }
-
-  get title() {
-    return this.#title;
+  getOffersOfType = (type) => this.#offersByType.find((el) => el.type === type).offers;
+  get offersByType() {
+    return this.#offersByType;
   }
 }

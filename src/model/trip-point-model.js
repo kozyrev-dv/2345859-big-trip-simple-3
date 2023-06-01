@@ -1,49 +1,28 @@
-export default class TripPointModel {
+import { randomTripPoint } from '../moks/trip-point-moks';
 
-  #basePrice = null;
-  #dateFrom = null;
-  #dateTo = null;
-  #destination = null;
-  #id = null;
-  #offers = null;
-  #type = null;
+export default class TripPointsModel {
 
-  constructor(basePrice, dateFrom, dateTo, destination, id, offers, type) {
-    this.#basePrice = basePrice;
-    this.#dateFrom = dateFrom;
-    this.#dateTo = dateTo;
-    this.#destination = destination;
-    this.#id = id;
-    this.#offers = offers;
-    this.#type = type;
+  #tripPoints = [];
+
+  constructor() {
+    this.#tripPoints = Array.from({length: 20}, (_, index) => {
+      const tripPoint = randomTripPoint(index);
+      return {
+        'basePrice' : tripPoint.base_price,
+        'dateFrom' : tripPoint.date_from,
+        'dateTo' : tripPoint.date_to,
+        'destination': tripPoint.destination,
+        'id': tripPoint.id,
+        'offers': tripPoint.offers,
+        'type': tripPoint.type
+      };
+    });
   }
 
-  get basePrice() {
-    return this.#basePrice;
-  }
+  getPoint = (id) => this.#tripPoints.find((el) => el.id === id);
 
-  get dateFrom() {
-    return this.#dateFrom;
-  }
-
-  get dateTo() {
-    return this.#dateTo;
-  }
-
-  get destination() {
-    return this.#destination;
-  }
-
-  get id() {
-    return this.#id;
-  }
-
-  get offers() {
-    return this.#offers;
-  }
-
-  get type() {
-    return this.#type;
+  get tripPoints () {
+    return this.#tripPoints;
   }
 
 }

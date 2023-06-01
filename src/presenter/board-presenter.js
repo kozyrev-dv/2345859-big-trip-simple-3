@@ -1,56 +1,74 @@
 import { render } from '../render';
-import TripPointView from '../view/trip-point-view';
+import TripPointsView from '../view/trip-point-view';
+import TripPointsModel from '../model/trip-point-model';
+import OffersModel from '../model/offer-model';
+import DestinationsModel from '../model/destination-model';
 import EventFormView from '../view/event-form-view';
-import { randomTripPoint } from '../moks/trip-point-moks';
-import { OFFERS_BY_TYPES } from '../moks/offers-by-type-moks';
-import { DESTINATIONS } from '../moks/const';
 
 export default class BoardPresenter {
 
   #tripPointsContainer = null;
 
+  #tripPointsModel = null;
+  #offersModel = null;
+  #destinationsModel = null;
+
+  #tripPointFormMap = null;
+
   constructor({tripPointsContainer}) {
     this.#tripPointsContainer = tripPointsContainer;
   }
 
-  init() {
+  init = () => {
 
-    const randPointToEdit = randomTripPoint();
-    let offersData = OFFERS_BY_TYPES.find((el) => el.type === randPointToEdit.type).offers.filter(
-      (offer) => randPointToEdit.offers.includes(offer.id)
-    );
-    let destinationData = DESTINATIONS[randPointToEdit.destination];
-    render(new EventFormView(
-      randPointToEdit.basePrice,
-      randPointToEdit.dateFrom,
-      randPointToEdit.dateTo,
-      destinationData,
-      randPointToEdit.id,
-      offersData,
-      randPointToEdit.type
-    ), this.#tripPointsContainer);
+    this.#tripPointsModel = new TripPointsModel();
+    this.#offersModel = new OffersModel();
+    this.#destinationsModel = new DestinationsModel();
 
-    const tripPointViews = Array.from({length: Math.floor(Math.random() * 30) + 5}, () => {
-      const randTripPointModel = randomTripPoint();
-      offersData = OFFERS_BY_TYPES.find((el) => el.type === randTripPointModel.type).offers.filter(
-        (offer) => randTripPointModel.offers.includes(offer.id)
+    this.#tripPointFormMap = new Map();
+
+    // render(new EventFormView(null, this.#offersModel.getOffersByType, this.#destinationsModel.destinations), this.#tripPointsContainer);
+    // render(new EventFormView(
+    //   this.#tripPointsModel.tripPoints[0],
+    //   this.#offersModel.getOffersByType,
+    //   this.#destinationsModel.destinations
+    // ), this.#tripPointsContainer);
+
+    for (const tripPoint of this.#tripPointsModel.tripPoints) {
+
+      const tripPointView = new TripPointsView(
+        tripPoint,
+        this.#offersModel.getOffersOfType(tripPoint.type),
+        this.#destinationsModel.destinations[tripPoint.destination]
       );
-      destinationData = DESTINATIONS[randTripPointModel.destination];
-
-      return new TripPointView(
-        randTripPointModel.basePrice,
-        randTripPointModel.dateFrom,
-        randTripPointModel.dateTo,
-        destinationData,
-        randTripPointModel.id,
-        offersData,
-        randTripPointModel.type
+      const eventFormView = new EventFormView(
+        tripPoint,
+        this.#offersModel.offersByType,
+        this.#destinationsModel.destinations
       );
-    });
+      this.#tripPointFormMap.set(tripPoint, {
+        'point' : tripPointView,
+        'form' : eventFormView
+      });
 
-    for (const el of tripPointViews){
-      render(el, this.#tripPointsContainer);
+      tripPointView.element.querySelector('.event__rollup-btn').addEventListener('click', (evt) => {
+        evt.preventDefault();
+        this.#tripPointsContainer.replaceChild(
+          this.#tripPointFormMap.get(tripPoint).form.element,
+          this.#tripPointFormMap.get(tripPoint).point.element
+        );
+      });
+
+      eventFormView.element.addEventListener('submit', (evt) => {
+        evt.preventDefault();
+        this.#tripPointsContainer.replaceChild(
+          this.#tripPointFormMap.get(tripPoint).point.element,
+          this.#tripPointFormMap.get(tripPoint).form.element
+        );
+      });
+
+      render(tripPointView, this.#tripPointsContainer);
     }
-  }
+  };
 
 }
