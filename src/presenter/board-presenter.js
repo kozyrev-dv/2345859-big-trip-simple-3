@@ -1,4 +1,4 @@
-import { render, replace, remove } from '../framework/render';
+import { render, replace } from '../framework/render';
 import TripPointsView from '../view/trip-point-view';
 import TripPointsModel from '../model/trip-point-model';
 import OffersModel from '../model/offer-model';
