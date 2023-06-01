@@ -20,7 +20,7 @@ export default class OffersModel {
   }
 
   getOffersOfType = (type) => this.#offersByType.find((el) => el.type === type).offers;
-  get getOffersByType() {
+  get offersByType() {
     return this.#offersByType;
   }
 }
