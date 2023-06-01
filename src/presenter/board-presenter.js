@@ -28,13 +28,6 @@ export default class BoardPresenter {
 
     this.#tripPointFormMap = new Map();
 
-    // render(new EventFormView(null, this.#offersModel.getOffersByType, this.#destinationsModel.destinations), this.#tripPointsContainer);
-    // render(new EventFormView(
-    //   this.#tripPointsModel.tripPoints[0],
-    //   this.#offersModel.getOffersByType,
-    //   this.#destinationsModel.destinations
-    // ), this.#tripPointsContainer);
-
     if(this.#tripPointsModel.tripPoints.length === 0) {
       render(new EmptyBoardView(), this.#tripPointsContainer);
       return;
