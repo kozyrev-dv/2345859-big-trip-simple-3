@@ -89,7 +89,6 @@ export default class BoardPresenter {
     }
 
     for (const tripPoint of this.tripPoints) {
-
       const tripPointPresenter = new TripPointPresenter(
         tripPoint,
         this.#tripPointsContainer
