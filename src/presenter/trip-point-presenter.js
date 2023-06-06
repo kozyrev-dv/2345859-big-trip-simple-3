@@ -3,11 +3,18 @@ import TripPointsView from '../view/trip-point-view';
 import EventFormView from '../view/event-form-view';
 import { render, replace } from '../framework/render';
 
+const TripPointViewMode = {
+  ITEM: 'ITEM',
+  FORM: 'FORM'
+};
+
 export default class TripPointPresenter {
 
   #point = null;
 
   #tripPointsContainer = null;
+
+  #mode = TripPointViewMode.ITEM;
 
   #tripPointView = null;
   #eventFormView = null;
@@ -16,7 +23,19 @@ export default class TripPointPresenter {
     this.#tripPointsContainer = tripPointsContainer;
   }
 
-  init = () => {
+  get mode() {
+    return this.#mode;
+  }
+
+  get tripPointView() {
+    return this.#tripPointView;
+  }
+
+  get eventFormView() {
+    return this.#eventFormView;
+  }
+
+  init = ({onTripPointClick, onEventFormViewSubmit}) => {
     this.#tripPointView = new TripPointsView(
       this.#point,
       BoardPresenter.offersModel.getOffersOfType(this.#point.type),
@@ -29,14 +48,28 @@ export default class TripPointPresenter {
     );
 
     this.#tripPointView.setOnClickHandler(() => {
-      replace(this.#eventFormView, this.#tripPointView);
+      onTripPointClick();
     });
 
     this.#eventFormView.setOnSubmitHandler(() => {
-      replace(this.#tripPointView, this.#eventFormView);
+      onEventFormViewSubmit();
     });
 
     render(this.#tripPointView, this.#tripPointsContainer);
   };
+
+  switchToForm() {
+    if(this.mode === TripPointViewMode.ITEM){
+      replace(this.eventFormView, this.tripPointView);
+      this.#mode = TripPointViewMode.FORM;
+    }
+  }
+
+  switchToItem() {
+    if(this.mode === TripPointViewMode.FORM){
+      replace(this.tripPointView, this.eventFormView);
+      this.#mode = TripPointViewMode.ITEM;
+    }
+  }
 
 }

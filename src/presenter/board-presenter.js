@@ -18,6 +18,8 @@ export default class BoardPresenter {
   #currentSortType = SortType.DAY;
   #currentFilterType = FilterType.EVERYTHING;
 
+  #tripPointPresenters = new Map();
+
   static get offersModel() {
     return this.#offersModel;
   }
@@ -92,7 +94,22 @@ export default class BoardPresenter {
         tripPoint,
         this.#tripPointsContainer
       );
-      tripPointPresenter.init();
+
+      this.#tripPointPresenters.set(tripPoint.id, tripPointPresenter);
+
+      tripPointPresenter.init({
+        onTripPointClick: () => {
+          tripPointPresenter.switchToForm();
+          for (const pres of this.#tripPointPresenters.values()) {
+            if(pres !== tripPointPresenter) {
+              pres.switchToItem();
+            }
+          }
+        },
+        onEventFormViewSubmit: () => {
+          tripPointPresenter.switchToItem();
+        }
+      });
     }
   };
 
