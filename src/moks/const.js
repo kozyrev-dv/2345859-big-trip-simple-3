@@ -5,6 +5,11 @@ const FILTER_HEADERS = {
   'everything': 'Everything'
 };
 
+const FilterType = {
+  FUTURE: 'FUTURE',
+  EVERYTHING: 'EVERYTHING'
+};
+
 const SORT_HEADERS = {
   'day': 'Day',
   'event': 'Event',
@@ -13,4 +18,9 @@ const SORT_HEADERS = {
   'offer': 'Offers'
 };
 
-export {OFFER_TYPES, FILTER_HEADERS, SORT_HEADERS};
+const SortType = {
+  DAY: 'DAY',
+  PRICE: 'PRICE'
+};
+
+export {OFFER_TYPES, FILTER_HEADERS, SORT_HEADERS, SortType, FilterType};

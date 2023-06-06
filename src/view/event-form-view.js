@@ -45,7 +45,7 @@ const createOfferSelectors = (currentTypeOffers, checkedOffers, id) => {
 
 
 const createTripPointFormViewTemplate = (point, offersByType, destinations) => {
-  const actualPoint = point || {
+  const actualPoint = point ?? {
     'basePrice' : '',
     'dateFrom' : undefined,
     'dateTo' : undefined,
