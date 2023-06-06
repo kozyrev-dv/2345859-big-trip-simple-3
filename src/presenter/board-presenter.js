@@ -1,10 +1,11 @@
-import { render, replace } from '../framework/render';
-import TripPointsView from '../view/trip-point-view';
+import { render } from '../framework/render';
 import TripPointsModel from '../model/trip-point-model';
-import OffersModel from '../model/offer-model';
-import DestinationsModel from '../model/destination-model';
-import EventFormView from '../view/event-form-view';
+import OffersModel from '../model/offers-model';
+import DestinationsModel from '../model/destinations-model';
 import EmptyBoardView from '../view/empty-board-view';
+import TripPointPresenter from './trip-point-presenter';
+import { FilterType, SortType } from '../moks/const';
+import dayjs from 'dayjs';
 
 export default class BoardPresenter {
 
@@ -16,8 +17,51 @@ export default class BoardPresenter {
 
   #tripPointFormMap = null;
 
+  #currentSortType = SortType.DAY;
+  #currentFilterType = FilterType.EVERYTHING;
+
   constructor({tripPointsContainer}) {
     this.#tripPointsContainer = tripPointsContainer;
+  }
+
+  static #sortPointsByDay = (a ,b) => {
+    const diff = dayjs(a.dateFrom).diff(dayjs(b.dateFrom));
+    if (diff > 0) {
+      return 1;
+    }
+    if (diff < 0){
+      return -1;
+    }
+
+    return 0;
+  };
+
+  static #sortPointsByPrice(a, b) {
+    if (a.price > b.price) {
+      return 1;
+    }
+    if (a.price < b.price) {
+      return 0;
+    }
+
+    return 0;
+  }
+
+  #filterTripPoints = (point) => {
+    if (this.#currentFilterType === FilterType.FUTURE) {
+      return dayjs().isBefore(dayjs(point.dateTo), 'date');
+    }
+    return true;
+  };
+
+  get tripPoints() {
+    switch(this.#currentSortType) {
+      case SortType.DAY:
+        return [...this.#tripPointsModel.tripPoints].filter(this.#filterTripPoints).sort(BoardPresenter.#sortPointsByDay);
+      case SortType.PRICE:
+        return [...this.#tripPointsModel.tripPoints].filter(this.#filterTripPoints).sort(BoardPresenter.#sortPointsByPrice);
+    }
+    return this.#tripPointsModel.tripPoints;
   }
 
   init = () => {
@@ -28,37 +72,19 @@ export default class BoardPresenter {
 
     this.#tripPointFormMap = new Map();
 
-    if(this.#tripPointsModel.tripPoints.length === 0) {
+    if(this.tripPoints.length === 0) {
       render(new EmptyBoardView(), this.#tripPointsContainer);
       return;
     }
 
-    for (const tripPoint of this.#tripPointsModel.tripPoints) {
+    for (const tripPoint of this.tripPoints) {
 
-      const tripPointView = new TripPointsView(
-        tripPoint,
-        this.#offersModel.getOffersOfType(tripPoint.type),
-        this.#destinationsModel.destinations[tripPoint.destination]
-      );
-      const eventFormView = new EventFormView(
+      const tripPointPresenter = new TripPointPresenter(
         tripPoint,
         this.#offersModel.offersByType,
         this.#destinationsModel.destinations
       );
-
-      this.#tripPointFormMap.set(tripPoint, {
-        'point' : tripPointView,
-        'form' : eventFormView
-      });
-
-      tripPointView.setOnClickHandler(() => {
-        replace(this.#tripPointFormMap.get(tripPoint).form, this.#tripPointFormMap.get(tripPoint).point);
-      });
-
-      eventFormView.setOnSubmitHandler(() => {
-        replace(this.#tripPointFormMap.get(tripPoint).point, this.#tripPointFormMap.get(tripPoint).form);
-      });
-
+      tripPointPresenter.init();
       render(tripPointView, this.#tripPointsContainer);
     }
   };

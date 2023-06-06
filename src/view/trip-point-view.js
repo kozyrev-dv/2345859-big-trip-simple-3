@@ -14,6 +14,7 @@ const createTripPointTemplate = (point, offersOfType, destination) => {
   const offersItems = point.offers.map((offerId) => createEventOfferElementTemplate(
     offersOfType.find((el) => el.id === offerId)
   )).join('');
+
   return `
   <li class="trip-events__item">
     <div class="event">
