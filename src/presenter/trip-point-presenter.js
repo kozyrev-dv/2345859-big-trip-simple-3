@@ -1,42 +1,42 @@
-
+import BoardPresenter from './board-presenter';
+import TripPointsView from '../view/trip-point-view';
+import EventFormView from '../view/event-form-view';
+import { render, replace } from '../framework/render';
 
 export default class TripPointPresenter {
 
   #point = null;
-  #offersByType = null;
-  #destinations = null;
 
-  constructor(point, offersByType, destinations) {
+  #tripPointsContainer = null;
+
+  #tripPointView = null;
+  #eventFormView = null;
+  constructor(point, tripPointsContainer) {
     this.#point = point;
-    this.#offersByType = offersByType;
-    this.#destinations = destinations;
+    this.#tripPointsContainer = tripPointsContainer;
   }
 
   init = () => {
-    const tripPointView = new TripPointsView(
+    this.#tripPointView = new TripPointsView(
       this.#point,
-      this.#offers,
-      this.#destination
+      BoardPresenter.offersModel.getOffersOfType(this.#point.type),
+      BoardPresenter.destinationsModel.destinations[this.#point.destination]
     );
-    const eventFormView = new EventFormView(
-      tripPoint,
-      this.#offersModel.offersByType,
-      this.#destinationsModel.destinations
+    this.#eventFormView = new EventFormView(
+      this.#point,
+      BoardPresenter.offersModel.offersByType,
+      BoardPresenter.destinationsModel.destinations
     );
 
-    this.#tripPointFormMap.set(tripPoint, {
-      'point' : tripPointView,
-      'form' : eventFormView
+    this.#tripPointView.setOnClickHandler(() => {
+      replace(this.#eventFormView, this.#tripPointView);
     });
 
-    tripPointView.setOnClickHandler(() => {
-      replace(this.#tripPointFormMap.get(tripPoint).form, this.#tripPointFormMap.get(tripPoint).point);
+    this.#eventFormView.setOnSubmitHandler(() => {
+      replace(this.#tripPointView, this.#eventFormView);
     });
 
-    eventFormView.setOnSubmitHandler(() => {
-      replace(this.#tripPointFormMap.get(tripPoint).point, this.#tripPointFormMap.get(tripPoint).form);
-    });
-
-  }
+    render(this.#tripPointView, this.#tripPointsContainer);
+  };
 
 }

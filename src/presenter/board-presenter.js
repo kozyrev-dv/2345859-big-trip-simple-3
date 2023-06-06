@@ -11,14 +11,20 @@ export default class BoardPresenter {
 
   #tripPointsContainer = null;
 
-  #tripPointsModel = null;
-  #offersModel = null;
-  #destinationsModel = null;
-
-  #tripPointFormMap = null;
+  static #tripPointsModel = null;
+  static #offersModel = null;
+  static #destinationsModel = null;
 
   #currentSortType = SortType.DAY;
   #currentFilterType = FilterType.EVERYTHING;
+
+  static get offersModel() {
+    return this.#offersModel;
+  }
+
+  static get destinationsModel() {
+    return this.#destinationsModel;
+  }
 
   constructor({tripPointsContainer}) {
     this.#tripPointsContainer = tripPointsContainer;
@@ -57,21 +63,24 @@ export default class BoardPresenter {
   get tripPoints() {
     switch(this.#currentSortType) {
       case SortType.DAY:
-        return [...this.#tripPointsModel.tripPoints].filter(this.#filterTripPoints).sort(BoardPresenter.#sortPointsByDay);
+        return [...BoardPresenter.#tripPointsModel.tripPoints].filter(this.#filterTripPoints).sort(BoardPresenter.#sortPointsByDay);
       case SortType.PRICE:
-        return [...this.#tripPointsModel.tripPoints].filter(this.#filterTripPoints).sort(BoardPresenter.#sortPointsByPrice);
+        return [...BoardPresenter.#tripPointsModel.tripPoints].filter(this.#filterTripPoints).sort(BoardPresenter.#sortPointsByPrice);
     }
-    return this.#tripPointsModel.tripPoints;
+    return BoardPresenter.#tripPointsModel.tripPoints;
   }
 
   init = () => {
 
-    this.#tripPointsModel = new TripPointsModel();
-    this.#offersModel = new OffersModel();
-    this.#destinationsModel = new DestinationsModel();
+    BoardPresenter.#tripPointsModel = new TripPointsModel();
+    BoardPresenter.#offersModel = new OffersModel();
+    BoardPresenter.#destinationsModel = new DestinationsModel();
 
-    this.#tripPointFormMap = new Map();
+    this.renderPoints();
 
+  };
+
+  renderPoints = () => {
     if(this.tripPoints.length === 0) {
       render(new EmptyBoardView(), this.#tripPointsContainer);
       return;
@@ -81,11 +90,9 @@ export default class BoardPresenter {
 
       const tripPointPresenter = new TripPointPresenter(
         tripPoint,
-        this.#offersModel.offersByType,
-        this.#destinationsModel.destinations
+        this.#tripPointsContainer
       );
       tripPointPresenter.init();
-      render(tripPointView, this.#tripPointsContainer);
     }
   };
 
