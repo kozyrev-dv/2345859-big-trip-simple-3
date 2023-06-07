@@ -23,4 +23,15 @@ const tripPointSortType = {
   PRICE: 'PRICE'
 };
 
-export {EVENT_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType};
+const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT:'ADD_POINT'
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR'
+};
+
+export {EVENT_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType, UpdateType, UserAction};

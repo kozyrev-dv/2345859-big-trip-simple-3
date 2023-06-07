@@ -1,10 +1,13 @@
 import { randomTripPoint } from '../moks/trip-point-moks';
+import Observable from '../framework/observable';
 
-export default class TripPointsModel {
+
+export default class TripPointsModel extends Observable {
 
   #tripPoints = [];
 
   constructor() {
+    super();
     this.#tripPoints = Array.from({length: 20}, (_, index) => {
       const tripPoint = randomTripPoint(index);
       return {
