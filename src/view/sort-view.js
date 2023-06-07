@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { SORT_HEADERS, tripPointSortType } from '../moks/const';
+import { SORT_HEADERS } from '../moks/const';
 
 const createSortItemElement = (sortType) => `
   <div class="trip-sort__item  trip-sort__item--${sortType}">
