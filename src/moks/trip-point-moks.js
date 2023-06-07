@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import { randomInt} from '../framework/utils/random-utils';
-import { OFFER_TYPES} from './const';
+import { EVENT_TYPES} from './const';
 import dayjs from 'dayjs';
 
 const randomTripPoint = () => ({
@@ -10,7 +10,7 @@ const randomTripPoint = () => ({
   'destination': randomInt(10),
   'id': nanoid(),
   'offers': Array.from({length: Math.floor(Math.random() * 2)}, () => Math.floor(Math.random() * 2)),
-  'type': OFFER_TYPES[randomInt(OFFER_TYPES.length)]
+  'type': EVENT_TYPES[randomInt(EVENT_TYPES.length)]
 });
 
 export {randomTripPoint};

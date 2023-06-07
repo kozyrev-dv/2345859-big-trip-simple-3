@@ -1,4 +1,4 @@
-const OFFER_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
+const EVENT_TYPES = ['taxi', 'bus', 'train', 'ship', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 
 const FILTER_HEADERS = {
   'future': 'Future',
@@ -23,4 +23,15 @@ const tripPointSortType = {
   PRICE: 'PRICE'
 };
 
-export {OFFER_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType};
+const UserAction = {
+  UPDATE_POINT: 'UPDATE_POINT',
+  ADD_POINT:'ADD_POINT'
+};
+
+const UpdateType = {
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR'
+};
+
+export {EVENT_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType, UpdateType, UserAction};

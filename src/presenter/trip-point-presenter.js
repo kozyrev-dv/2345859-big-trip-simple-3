@@ -2,6 +2,10 @@ import BoardPresenter from './board-presenter';
 import TripPointsView from '../view/trip-point-view';
 import EventFormView from '../view/event-form-view';
 import { remove, render, replace } from '../framework/render';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
+
 
 const TripPointViewMode = {
   ITEM: 'ITEM',
