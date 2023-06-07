@@ -3,6 +3,7 @@ import { EVENT_TYPES } from '../moks/const';
 import { uppercaseFirst } from '../framework/utils/string-utils';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
+import flatpickr from 'flatpickr';
 
 const createDestinationPhotostape = (destination) => destination.pictures.map(
   (picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
@@ -59,11 +60,11 @@ const createTripPointFormViewTemplate = (pointState, offersByType, destinations)
     <form class="event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
-          <label class="event__type  event__type-btn" for="event-type-toggle-1">
+          <label class="event__type  event__type-btn" for="event-type-toggle-${pointState.id}">
             <span class="visually-hidden">Choose event type</span>
             <img class="event__type-icon" width="17" height="17" src="img/icons/${pointState.type}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${pointState.id}" type="checkbox">
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
@@ -74,29 +75,29 @@ const createTripPointFormViewTemplate = (pointState, offersByType, destinations)
         </div>
 
         <div class="event__field-group  event__field-group--destination">
-          <label class="event__label  event__type-output" for="event-destination-1">
+          <label class="event__label  event__type-output" for="event-destination-${pointState.id}">
             ${uppercaseFirst(pointState.type)}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${(pointState.destination) ? destinations[pointState.destination].name : ''}" list="destination-list-1">
-          <datalist id="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-${pointState.id}" type="text" name="event-destination" value="${(pointState.destination) ? destinations[pointState.destination].name : ''}" list="destination-list-${pointState.id}">
+          <datalist id="destination-list-${pointState.id}">
             ${createDestinationOptions(destinations)}
           </datalist>
         </div>
 
         <div class="event__field-group  event__field-group--time">
-          <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${pointState.dateFromFormated}">
+          <label class="visually-hidden" for="event-start-time-${pointState.id}">From</label>
+          <input class="event__input  event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}">
           &mdash;
-          <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${pointState.dateToFormated}">
+          <label class="visually-hidden" for="event-end-time-${pointState.id}">To</label>
+          <input class="event__input  event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
-          <label class="event__label" for="event-price-1">
+          <label class="event__label" for="event-price-${pointState.id}">
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${pointState.basePrice}">
+          <input class="event__input  event__input--price" id="event-price-${pointState.id}" type="text" name="event-price" value="${pointState.basePrice}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -128,6 +129,9 @@ export default class EventFormView extends AbstractStatefulView{
   #offersByType = null;
   #destinations = null;
 
+  #dateFromDatepicker = null;
+  #dateToDatepicker = null;
+
   constructor(point, offersByType, destinations) {
     super();
     this._setState(EventFormView.parsePointToState(point));
@@ -135,7 +139,6 @@ export default class EventFormView extends AbstractStatefulView{
     this.#destinations = destinations;
 
     this._restoreHandlers();
-
   }
 
   static parsePointToState = (point) => {
@@ -148,14 +151,14 @@ export default class EventFormView extends AbstractStatefulView{
       'offers': null,
       'type': EVENT_TYPES[0]
     };
-    const dateFromActual = dayjs(actualPoint.dateFrom).format('DD/MM/YY HH:mm'); //19/03/19 00:00
-    const dateToActual = dayjs(actualPoint.dateTo).format('DD/MM/YY HH:mm'); //19/03/19 00:00
+    const dateFromFormated = dayjs(actualPoint.dateFrom).format('DD/MM/YY HH:mm'); //19/03/19 00:00
+    const dateToFormated = dayjs(actualPoint.dateTo).format('DD/MM/YY HH:mm'); //19/03/19 00:00
     const checkedOffersIds = (actualPoint.offers) ? actualPoint.offers.map((offer) => offer.id) : [];
 
     return {
       ...actualPoint,
-      dateFromFormated: dateFromActual,
-      dateToFormated: dateToActual,
+      dateFromFormated: dateFromFormated,
+      dateToFormated: dateToFormated,
       checkedOffersIds: checkedOffersIds,
     };
   };
@@ -174,9 +177,44 @@ export default class EventFormView extends AbstractStatefulView{
     return createTripPointFormViewTemplate(this._state, this.#offersByType, this.#destinations);
   }
 
+  removeElement() {
+    super.removeElement();
+
+    if (this.#dateFromDatepicker) {
+      this.#dateFromDatepicker.destroy();
+      this.#dateFromDatepicker = null;
+    }
+
+    if (this.#dateToDatepicker) {
+      this.#dateToDatepicker.destroy();
+      this.#dateToDatepicker = null;
+    }
+  }
+
+  #setDatePickers = () => {
+    this.#dateFromDatepicker = flatpickr(
+      this.element.querySelector('.event__input--time-start'),
+      {
+        dateFormat: 'd/m/y H:i', //19/03/19 00:00
+        enableTime: true,
+        defaultDate: dayjs(this._state.dateFrom).toDate(),
+        onClose: this.#onDateFromPickerClosed
+      }
+    );
+  };
+
   _restoreHandlers = () => {
+    this.#setDatePickers();
     this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClicked);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#onDestinationChanged);
+  };
+
+  #onDateFromPickerClosed = ([dateFrom]) => {
+    const dateFromFormated = dayjs(dateFrom).format('DD/MM/YY HH:mm'); //19/03/19 00:00
+    this.updateElement({
+      dateFrom: dateFrom,
+      dateFromFormated: dateFromFormated
+    });
   };
 
   #onEventTypeClicked = (evt) => {
