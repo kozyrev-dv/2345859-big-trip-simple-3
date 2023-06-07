@@ -7,7 +7,7 @@ export default class DestinationsModel {
   constructor() {
     this.#destinations = Array.from({length: 10}, (_, i) => ({
       'id': i,
-      'description': randomString(20),
+      'description': randomString(10),
       'name': randomString(10),
       'pictures': [
         {
