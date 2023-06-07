@@ -1,7 +1,7 @@
 import BoardPresenter from './board-presenter';
 import TripPointsView from '../view/trip-point-view';
 import EventFormView from '../view/event-form-view';
-import { render, replace } from '../framework/render';
+import { remove, render, replace } from '../framework/render';
 
 const TripPointViewMode = {
   ITEM: 'ITEM',
@@ -58,18 +58,23 @@ export default class TripPointPresenter {
     render(this.#tripPointView, this.#tripPointsContainer);
   };
 
-  switchToForm() {
+  switchViewToForm() {
     if(this.mode === TripPointViewMode.ITEM){
       replace(this.eventFormView, this.tripPointView);
       this.#mode = TripPointViewMode.FORM;
     }
   }
 
-  switchToItem() {
+  switchViewToItem() {
     if(this.mode === TripPointViewMode.FORM){
       replace(this.tripPointView, this.eventFormView);
       this.#mode = TripPointViewMode.ITEM;
     }
+  }
+
+  removePoint() {
+    remove(this.#tripPointView);
+    remove(this.#eventFormView);
   }
 
 }

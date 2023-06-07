@@ -4,8 +4,13 @@ import OffersModel from '../model/offers-model';
 import DestinationsModel from '../model/destinations-model';
 import EmptyBoardView from '../view/empty-board-view';
 import TripPointPresenter from './trip-point-presenter';
-import { FilterType, SortType } from '../moks/const';
+import { FilterType, tripPointSortType } from '../moks/const';
 import dayjs from 'dayjs';
+import FilterView from '../view/filter-view';
+import SortView from '../view/sort-view';
+
+const filters = ['future', 'everything'];
+const sortTypes = ['day', 'event', 'time', 'price', 'offer'];
 
 export default class BoardPresenter {
 
@@ -15,7 +20,10 @@ export default class BoardPresenter {
   static #offersModel = null;
   static #destinationsModel = null;
 
-  #currentSortType = SortType.DAY;
+  #sortView = null;
+  #filterView = null;
+
+  #currentSortType = tripPointSortType.DAY;
   #currentFilterType = FilterType.EVERYTHING;
 
   #tripPointPresenters = new Map();
@@ -45,11 +53,11 @@ export default class BoardPresenter {
   };
 
   static #sortPointsByPrice(a, b) {
-    if (a.price > b.price) {
-      return 1;
+    if (a.basePrice > b.basePrice) {
+      return -1;
     }
-    if (a.price < b.price) {
-      return 0;
+    if (a.basePrice < b.basePrice) {
+      return 1;
     }
 
     return 0;
@@ -64,9 +72,9 @@ export default class BoardPresenter {
 
   get tripPoints() {
     switch(this.#currentSortType) {
-      case SortType.DAY:
+      case tripPointSortType.DAY:
         return [...BoardPresenter.#tripPointsModel.tripPoints].filter(this.#filterTripPoints).sort(BoardPresenter.#sortPointsByDay);
-      case SortType.PRICE:
+      case tripPointSortType.PRICE:
         return [...BoardPresenter.#tripPointsModel.tripPoints].filter(this.#filterTripPoints).sort(BoardPresenter.#sortPointsByPrice);
     }
     return BoardPresenter.#tripPointsModel.tripPoints;
@@ -77,18 +85,49 @@ export default class BoardPresenter {
     BoardPresenter.#tripPointsModel = new TripPointsModel();
     BoardPresenter.#offersModel = new OffersModel();
     BoardPresenter.#destinationsModel = new DestinationsModel();
+    this.#sortView = new SortView(sortTypes);
+    this.#filterView = new FilterView(filters);
 
-    this.renderPoints();
+    this.#renderFilter();
+    this.#renderSort();
+
+    this.#renderPoints();
 
   };
 
-  renderPoints = () => {
-    if(this.tripPoints.length === 0) {
+  #renderSort = () => {
+    render(this.#sortView, document.querySelector('.trip-events__sort'));
+    this.#sortView.setSortTypeChangeHandler(this.#onSortTypeChange);
+  };
+
+  #onSortTypeChange = (sortType) => {
+    if(this.#currentSortType === sortType || !Object.values(tripPointSortType).includes(sortType)) {
+      return;
+    }
+    this.#currentSortType = sortType;
+    this.#removePoints();
+    this.#renderPoints();
+  };
+
+  #renderFilter = () => {
+    render(this.#filterView, document.querySelector('.trip-controls__filters'));
+  };
+
+  #removePoints = () => {
+    for(const pres of this.#tripPointPresenters.values()) {
+      pres.removePoint();
+    }
+    this.#tripPointPresenters.clear();
+  };
+
+  #renderPoints = () => {
+    const tripPoints = this.tripPoints;
+    if(tripPoints.length === 0) {
       render(new EmptyBoardView(), this.#tripPointsContainer);
       return;
     }
 
-    for (const tripPoint of this.tripPoints) {
+    for (const tripPoint of tripPoints) {
       const tripPointPresenter = new TripPointPresenter(
         tripPoint,
         this.#tripPointsContainer
@@ -98,15 +137,15 @@ export default class BoardPresenter {
 
       tripPointPresenter.init({
         onTripPointClick: () => {
-          tripPointPresenter.switchToForm();
+          tripPointPresenter.switchViewToForm();
           for (const pres of this.#tripPointPresenters.values()) {
             if(pres !== tripPointPresenter) {
-              pres.switchToItem();
+              pres.switchViewToItem();
             }
           }
         },
         onEventFormViewSubmit: () => {
-          tripPointPresenter.switchToItem();
+          tripPointPresenter.switchViewToItem();
         }
       });
     }
