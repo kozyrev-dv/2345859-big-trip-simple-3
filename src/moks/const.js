@@ -18,9 +18,9 @@ const SORT_HEADERS = {
   'offer': 'Offers'
 };
 
-const SortType = {
+const tripPointSortType = {
   DAY: 'DAY',
   PRICE: 'PRICE'
 };
 
-export {OFFER_TYPES, FILTER_HEADERS, SORT_HEADERS, SortType, FilterType};
+export {OFFER_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType};
