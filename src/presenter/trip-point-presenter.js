@@ -2,7 +2,7 @@ import BoardPresenter from './board-presenter';
 import TripPointsView from '../view/trip-point-view';
 import EventFormView from '../view/event-form-view';
 import { remove, render, replace } from '../framework/render';
-import flatpickr from 'flatpickr';
+import { UserAction, UpdateType } from '../moks/const';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -15,16 +15,19 @@ const TripPointViewMode = {
 export default class TripPointPresenter {
 
   #point = null;
+  #mode = TripPointViewMode.ITEM;
 
   #tripPointsContainer = null;
 
-  #mode = TripPointViewMode.ITEM;
-
   #tripPointView = null;
   #eventFormView = null;
-  constructor(point, tripPointsContainer) {
+
+  #onDataChange = null;
+
+  constructor(point, tripPointsContainer, {onDataChange}) {
     this.#point = point;
     this.#tripPointsContainer = tripPointsContainer;
+    this.#onDataChange = onDataChange;
   }
 
   get mode() {
@@ -39,7 +42,7 @@ export default class TripPointPresenter {
     return this.#eventFormView;
   }
 
-  init = ({onTripPointClick, onEventFormViewSubmit}) => {
+  init = ({onTripPointClick}) => {
     this.#tripPointView = new TripPointsView(
       this.#point,
       BoardPresenter.offersModel.getOffersOfType(this.#point.type),
@@ -55,8 +58,13 @@ export default class TripPointPresenter {
       onTripPointClick();
     });
 
-    this.#eventFormView.setOnSubmitHandler(() => {
-      onEventFormViewSubmit();
+    this.#eventFormView.setOnFormSubmit((update) => {
+      this.#onDataChange(
+        UserAction.UPDATE_POINT,
+        UpdateType.PATCH,
+        update,
+      );
+      this.switchViewToItem();
     });
 
     render(this.#tripPointView, this.#tripPointsContainer);
@@ -66,11 +74,13 @@ export default class TripPointPresenter {
     if(this.mode === TripPointViewMode.ITEM){
       replace(this.eventFormView, this.tripPointView);
       this.#mode = TripPointViewMode.FORM;
+      document.body.addEventListener('keydown', this.#onKeyDown);
     }
   }
 
   switchViewToItem() {
     if(this.mode === TripPointViewMode.FORM){
+      document.body.removeEventListener('keydown', this.#onKeyDown);
       replace(this.tripPointView, this.eventFormView);
       this.#mode = TripPointViewMode.ITEM;
     }
@@ -80,5 +90,14 @@ export default class TripPointPresenter {
     remove(this.#tripPointView);
     remove(this.#eventFormView);
   }
+
+  #onKeyDown = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#eventFormView.reset(this.#point);
+      this.switchViewToItem();
+      document.body.removeEventListener('keydown', this.#onKeyDown);
+    }
+  };
 
 }

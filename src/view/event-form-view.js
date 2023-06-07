@@ -201,10 +201,22 @@ export default class EventFormView extends AbstractStatefulView{
         onClose: this.#onDateFromPickerClosed
       }
     );
+    this.#dateToDatepicker = flatpickr(
+      this.element.querySelector('.event__input--time-end'),
+      {
+        dateFormat: 'd/m/y H:i', //19/03/19 00:00
+        enableTime: true,
+        defaultDate: dayjs(this._state.dateTo).toDate(),
+        onClose: this.#onDateToPickerClosed
+      }
+    );
   };
 
   _restoreHandlers = () => {
     this.#setDatePickers();
+
+    this._callback.onFormSubmit =
+
     this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClicked);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#onDestinationChanged);
   };
@@ -214,6 +226,14 @@ export default class EventFormView extends AbstractStatefulView{
     this.updateElement({
       dateFrom: dateFrom,
       dateFromFormated: dateFromFormated
+    });
+  };
+
+  #onDateToPickerClosed = ([dateTo]) => {
+    const dateToFormated = dayjs(dateTo).format('DD/MM/YY HH:mm'); //19/03/19 00:00
+    this.updateElement({
+      dateTo: dateTo,
+      dateToFormated: dateToFormated
     });
   };
 
@@ -236,14 +256,20 @@ export default class EventFormView extends AbstractStatefulView{
     }
   };
 
-  setOnSubmitHandler = (callback) => {
+  setOnFormSubmit = (callback) => {
     this._callback.submit = callback;
-    this.element.addEventListener('submit', this.#onSubmitHandler);
+    this.element.addEventListener('submit', this.#onFormSubmit);
   };
 
-  #onSubmitHandler = (evt) => {
+  #onFormSubmit = (evt) => {
     evt.preventDefault();
     this._callback.submit(EventFormView.parseStateToPoint(this._state));
+  };
+
+  reset = (point) => {
+    this.updateElement(
+      EventFormView.parsePointToState(point)
+    );
   };
 
 }

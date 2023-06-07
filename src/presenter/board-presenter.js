@@ -1,10 +1,10 @@
 import { render } from '../framework/render';
-import TripPointsModel from '../model/trip-point-model';
+import TripPointsModel from '../model/trip-points-model';
 import OffersModel from '../model/offers-model';
 import DestinationsModel from '../model/destinations-model';
 import EmptyBoardView from '../view/empty-board-view';
 import TripPointPresenter from './trip-point-presenter';
-import { FilterType, tripPointSortType } from '../moks/const';
+import { FilterType, tripPointSortType, UserAction, UpdateType } from '../moks/const';
 import dayjs from 'dayjs';
 import FilterView from '../view/filter-view';
 import SortView from '../view/sort-view';
@@ -85,6 +85,9 @@ export default class BoardPresenter {
     BoardPresenter.#tripPointsModel = new TripPointsModel();
     BoardPresenter.#offersModel = new OffersModel();
     BoardPresenter.#destinationsModel = new DestinationsModel();
+
+    BoardPresenter.#tripPointsModel.addObserver(this.#handleModelEvent);
+
     this.#sortView = new SortView(sortTypes);
     this.#filterView = new FilterView(filters);
 
@@ -93,6 +96,39 @@ export default class BoardPresenter {
 
     this.#renderPoints();
 
+  };
+
+  #handleViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.ADD_POINT:
+        BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
+        break;
+      case UserAction.UPDATE_POINT:
+        BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
+        break;
+      case UserAction.DELETE_POINT:
+        throw new Error('Can not delete a point yet');
+        //BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
+        //break;
+    }
+  };
+
+  #handleModelEvent = (updateType, data) => {
+    switch(updateType) {
+      case UpdateType.PATCH:
+        this.#tripPointPresenters.get(data.id).init(data);
+        break;
+      case UpdateType.MINOR:
+        this.#removePoints();
+        this.#renderPoints();
+        break;
+      case UpdateType.MAJOR:
+        this.#removePoints(true);
+        this.#renderPoints();
+        break;
+      default:
+        throw new Error('Unknown update type used');
+    }
   };
 
   #renderSort = () => {
@@ -113,11 +149,15 @@ export default class BoardPresenter {
     render(this.#filterView, document.querySelector('.trip-controls__filters'));
   };
 
-  #removePoints = () => {
+  #removePoints = (resetSortType) => {
     for(const pres of this.#tripPointPresenters.values()) {
       pres.removePoint();
     }
     this.#tripPointPresenters.clear();
+
+    if (resetSortType) {
+      this.#currentSortType = tripPointSortType.DAY;
+    }
   };
 
   #renderPoints = () => {
@@ -130,7 +170,10 @@ export default class BoardPresenter {
     for (const tripPoint of tripPoints) {
       const tripPointPresenter = new TripPointPresenter(
         tripPoint,
-        this.#tripPointsContainer
+        this.#tripPointsContainer,
+        {
+          onDataChange: this.#handleViewAction
+        }
       );
 
       this.#tripPointPresenters.set(tripPoint.id, tripPointPresenter);
@@ -143,9 +186,6 @@ export default class BoardPresenter {
               pres.switchViewToItem();
             }
           }
-        },
-        onEventFormViewSubmit: () => {
-          tripPointPresenter.switchViewToItem();
         }
       });
     }
