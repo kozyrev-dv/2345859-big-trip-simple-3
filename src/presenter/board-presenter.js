@@ -169,25 +169,23 @@ export default class BoardPresenter {
 
     for (const tripPoint of tripPoints) {
       const tripPointPresenter = new TripPointPresenter(
-        tripPoint,
         this.#tripPointsContainer,
         {
-          onDataChange: this.#handleViewAction
+          onDataChange: this.#handleViewAction,
+          onTripPointClick: () => {
+            tripPointPresenter.switchViewToForm();
+            for (const pres of this.#tripPointPresenters.values()) {
+              if(pres !== tripPointPresenter) {
+                pres.switchViewToItem();
+              }
+            }
+          }
         }
       );
 
       this.#tripPointPresenters.set(tripPoint.id, tripPointPresenter);
 
-      tripPointPresenter.init({
-        onTripPointClick: () => {
-          tripPointPresenter.switchViewToForm();
-          for (const pres of this.#tripPointPresenters.values()) {
-            if(pres !== tripPointPresenter) {
-              pres.switchViewToItem();
-            }
-          }
-        }
-      });
+      tripPointPresenter.init(tripPoint);
     }
   };
 

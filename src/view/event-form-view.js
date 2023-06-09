@@ -215,7 +215,7 @@ export default class EventFormView extends AbstractStatefulView{
   _restoreHandlers = () => {
     this.#setDatePickers();
 
-    this._callback.onFormSubmit =
+    this.setOnFormSubmit(this._callback.submit);
 
     this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClicked);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#onDestinationChanged);
@@ -224,7 +224,7 @@ export default class EventFormView extends AbstractStatefulView{
   #onDateFromPickerClosed = ([dateFrom]) => {
     const dateFromFormated = dayjs(dateFrom).format('DD/MM/YY HH:mm'); //19/03/19 00:00
     this.updateElement({
-      dateFrom: dateFrom,
+      dateFrom: dateFrom.toString(),
       dateFromFormated: dateFromFormated
     });
   };
@@ -232,7 +232,7 @@ export default class EventFormView extends AbstractStatefulView{
   #onDateToPickerClosed = ([dateTo]) => {
     const dateToFormated = dayjs(dateTo).format('DD/MM/YY HH:mm'); //19/03/19 00:00
     this.updateElement({
-      dateTo: dateTo,
+      dateTo: dateTo.toString(),
       dateToFormated: dateToFormated
     });
   };
