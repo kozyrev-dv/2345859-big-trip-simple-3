@@ -4,10 +4,11 @@ import OffersModel from '../model/offers-model';
 import DestinationsModel from '../model/destinations-model';
 import EmptyBoardView from '../view/empty-board-view';
 import TripPointPresenter from './trip-point-presenter';
-import { FilterType, tripPointSortType, UserAction, UpdateType } from '../moks/const';
+import { FilterType, tripPointSortType, UserAction, UpdateType, EventFormViewMode } from '../moks/const';
 import dayjs from 'dayjs';
 import FilterView from '../view/filter-view';
 import SortView from '../view/sort-view';
+import EventFormView from '../view/event-form-view';
 
 const filters = ['future', 'everything'];
 const sortTypes = ['day', 'event', 'time', 'price', 'offer'];
@@ -38,6 +39,7 @@ export default class BoardPresenter {
 
   constructor({tripPointsContainer}) {
     this.#tripPointsContainer = tripPointsContainer;
+    document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#onNewEventButtonClick);
   }
 
   static #sortPointsByDay = (a ,b) => {
@@ -129,6 +131,16 @@ export default class BoardPresenter {
       default:
         throw new Error('Unknown update type used');
     }
+  };
+
+  #onNewEventButtonClick = (evt) => {
+    evt.preventDefault();
+    render(new EventFormView(
+      EventFormViewMode.CREATE,
+      null,
+      BoardPresenter.#offersModel.offersByType,
+      BoardPresenter.#destinationsModel.destinations
+    ), this.#tripPointsContainer, 'afterbegin');
   };
 
   #renderSort = () => {

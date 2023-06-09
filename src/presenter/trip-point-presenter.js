@@ -2,7 +2,7 @@ import BoardPresenter from './board-presenter';
 import TripPointsView from '../view/trip-point-view';
 import EventFormView from '../view/event-form-view';
 import { remove, render, replace } from '../framework/render';
-import { UserAction, UpdateType } from '../moks/const';
+import { UserAction, UpdateType, EventFormViewMode } from '../moks/const';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -55,6 +55,7 @@ export default class TripPointPresenter {
       BoardPresenter.destinationsModel.destinations[this.#point.destination]
     );
     this.#eventFormView = new EventFormView(
+      EventFormViewMode.EDIT,
       this.#point,
       BoardPresenter.offersModel.offersByType,
       BoardPresenter.destinationsModel.destinations

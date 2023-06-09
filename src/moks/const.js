@@ -35,4 +35,9 @@ const UpdateType = {
   MAJOR: 'MAJOR'
 };
 
-export {EVENT_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType, UpdateType, UserAction};
+const EventFormViewMode = {
+  CREATE: 'CREATE',
+  EDIT: 'EDIT'
+};
+
+export {EVENT_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType, UpdateType, UserAction, EventFormViewMode};
