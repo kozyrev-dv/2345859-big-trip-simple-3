@@ -65,7 +65,7 @@ export default class TripPointPresenter {
     this.#eventFormView.setOnFormSubmit((update) => {
       this.#onDataChange(
         UserAction.UPDATE_POINT,
-        UpdateType.PATCH,
+        UpdateType.MINOR,
         update,
       );
       this.switchViewToItem();
