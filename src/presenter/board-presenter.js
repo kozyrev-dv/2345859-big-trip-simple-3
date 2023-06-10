@@ -107,7 +107,9 @@ export default class BoardPresenter {
 
     this.isLoading = true;
 
-    this.#filterView = new FilterView();
+    this.#filterView = new FilterView({
+      onFilterClick: this.#onFilterClick
+    });
     this.#sortView = new SortView();
 
     this.#renderFilter();
@@ -121,6 +123,11 @@ export default class BoardPresenter {
       document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#onNewEventButtonClick);
     });
 
+  };
+
+  #onFilterClick = (filterType) => {
+    this.#currentFilterType = filterType;
+    this.#handleModelEvent(UpdateType.MINOR);
   };
 
   #handleViewAction = async (actionType, updateType, update) => {
