@@ -58,20 +58,26 @@ export default class TripPointsModel extends Observable {
         ...this.#tripPoints.slice(index + 1),
       ];
 
-      this._notify(updateType, update);
+      this._notify(updateType, updatedPoint);
     } catch(err) {
-      throw new Error('Can\'t update triPoint');
+      throw new Error('Can\'t update tripPoint');
     }
 
   };
 
-  addTripPoint(updateType, update) {
-    this.#tripPoints = [
-      update,
-      ...this.#tripPoints
-    ];
+  addTripPoint = async (updateType, update) => {
+    try {
+      const response = await this.#tripPointsApiService.addPoint(update);
+      const newPoint = this.#adaptToClient(response);
+      this.#tripPoints = [
+        newPoint,
+        ...this.#tripPoints
+      ];
 
-    this._notify(updateType, update);
+      this._notify(updateType, newPoint);
+    } catch(err) {
+      throw new Error('Can\'t add tripPoint');
+    }
   }
 
   deleteTripPoint(updateType, update) {
