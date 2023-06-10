@@ -30,7 +30,7 @@ export default class OffersModel extends Observable{
   init = async () => {
 
     try {
-      this.#offersByType = await this.#tripPointApiService.offers;
+      this.#offersByType = await this.#tripPointApiService.getOffers();
     } catch(err) {
       this.#offersByType = [];
     }
