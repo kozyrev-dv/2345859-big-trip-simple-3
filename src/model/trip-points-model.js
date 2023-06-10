@@ -67,5 +67,4 @@ export default class TripPointsModel extends Observable {
 
     this._notify(updateType);
   }
-
 }
