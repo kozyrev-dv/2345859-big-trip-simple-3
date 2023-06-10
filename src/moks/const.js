@@ -25,7 +25,8 @@ const tripPointSortType = {
 
 const UserAction = {
   UPDATE_POINT: 'UPDATE_POINT',
-  ADD_POINT:'ADD_POINT'
+  ADD_POINT:'ADD_POINT',
+  DELETE_POINT: 'DELETE_POINT'
 };
 
 const UpdateType = {
@@ -34,4 +35,9 @@ const UpdateType = {
   MAJOR: 'MAJOR'
 };
 
-export {EVENT_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType, UpdateType, UserAction};
+const EventFormViewMode = {
+  CREATE: 'CREATE',
+  EDIT: 'EDIT'
+};
+
+export {EVENT_TYPES, FILTER_HEADERS, SORT_HEADERS, tripPointSortType, FilterType, UpdateType, UserAction, EventFormViewMode};
