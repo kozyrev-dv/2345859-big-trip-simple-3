@@ -12,8 +12,8 @@ const SORT_TYPES = ['day', 'event', 'time', 'price', 'offer'];
 
 const createSortItemElement = (sortType) => `
   <div class="trip-sort__item  trip-sort__item--${sortType}">
-    <input id="sort-${sortType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${sortType}">
-    <label data-sort-type="${sortType.toUpperCase()}" class="trip-sort__btn" for="sort-${sortType}">${SORT_HEADERS[sortType]}</label>
+    <input data-sort-type="${sortType.toUpperCase()}" id="sort-${sortType}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${sortType}" ${sortType === 'day' ? 'checked' : ''}>
+    <label class="trip-sort__btn" for="sort-${sortType}">${SORT_HEADERS[sortType]}</label>
   </div>`;
 
 const createSortElementTemplate = (sortTypes) => {
@@ -46,14 +46,10 @@ export default class SortView extends AbstractView{
 
   setSortTypeChangeHandler = (callback) => {
     this._callback.sortTypeChange = callback;
-    this.element.addEventListener('click', this.#sortTypeChangeHandler);
+    this.element.addEventListener('change', this.#sortTypeChangeHandler);
   };
 
   #sortTypeChangeHandler = (evt) => {
-    if(evt.target.tagName !== 'LABEL') {
-      return;
-    }
-
     evt.preventDefault();
     this._callback.sortTypeChange(evt.target.dataset.sortType);
   };
