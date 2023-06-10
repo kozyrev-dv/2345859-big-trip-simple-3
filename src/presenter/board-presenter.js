@@ -1,4 +1,4 @@
-import { render } from '../framework/render';
+import { render, remove } from '../framework/render';
 import TripPointsModel from '../model/trip-points-model';
 import OffersModel from '../model/offers-model';
 import DestinationsModel from '../model/destinations-model';
@@ -23,6 +23,7 @@ export default class BoardPresenter {
 
   #sortView = null;
   #filterView = null;
+  #createEventForm = null;
 
   #currentSortType = tripPointSortType.DAY;
   #currentFilterType = FilterType.EVERYTHING;
@@ -109,9 +110,10 @@ export default class BoardPresenter {
         BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
         break;
       case UserAction.DELETE_POINT:
-        throw new Error('Can not delete a point yet');
-        //BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
-        //break;
+        BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
+        break;
+      default:
+        new Error('Unknown user action ', actionType);
     }
   };
 
@@ -121,11 +123,11 @@ export default class BoardPresenter {
         this.#tripPointPresenters.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
-        this.#removePoints();
+        this.#clearBoard();
         this.#renderPoints();
         break;
       case UpdateType.MAJOR:
-        this.#removePoints(true);
+        this.#clearBoard(true);
         this.#renderPoints();
         break;
       default:
@@ -135,12 +137,33 @@ export default class BoardPresenter {
 
   #onNewEventButtonClick = (evt) => {
     evt.preventDefault();
-    render(new EventFormView(
+    this.#createEventForm = new EventFormView(
       EventFormViewMode.CREATE,
       null,
       BoardPresenter.#offersModel.offersByType,
       BoardPresenter.#destinationsModel.destinations
-    ), this.#tripPointsContainer, 'afterbegin');
+    );
+    this.#createEventForm.setOnFormSubmit(this.#handleViewAction);
+    this.#createEventForm.setOnFormCancel(this.#onCreateFormCancel);
+    document.body.addEventListener('keydown', this.#onCreateFormKeyDown);
+    render(this.#createEventForm, this.#tripPointsContainer, 'afterbegin');
+  };
+
+  #cancelEventForm = () => {
+    this.#createEventForm.cancel();
+    this.#createEventForm = null;
+    document.body.removeEventListener('keydown', this.#onCreateFormKeyDown);
+  };
+
+  #onCreateFormCancel = () => {
+    this.#cancelEventForm();
+  };
+
+  #onCreateFormKeyDown = (evt) => {
+    if(evt.key === 'Escape') {
+      evt.preventDefault();
+      this.#cancelEventForm();
+    }
   };
 
   #renderSort = () => {
@@ -153,7 +176,7 @@ export default class BoardPresenter {
       return;
     }
     this.#currentSortType = sortType;
-    this.#removePoints();
+    this.#clearBoard();
     this.#renderPoints();
   };
 
@@ -161,11 +184,13 @@ export default class BoardPresenter {
     render(this.#filterView, document.querySelector('.trip-controls__filters'));
   };
 
-  #removePoints = (resetSortType) => {
+  #clearBoard = (resetSortType) => {
     for(const pres of this.#tripPointPresenters.values()) {
       pres.removePoint();
     }
     this.#tripPointPresenters.clear();
+    remove(this.#createEventForm);
+    this.#createEventForm = null;
 
     if (resetSortType) {
       this.#currentSortType = tripPointSortType.DAY;

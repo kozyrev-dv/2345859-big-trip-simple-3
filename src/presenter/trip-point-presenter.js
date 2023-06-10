@@ -72,6 +72,14 @@ export default class TripPointPresenter {
       this.switchViewToItem();
     });
 
+    this.#eventFormView.setOnFormCancel(() => {
+      this.#onDataChange(
+        UserAction.DELETE_POINT,
+        UpdateType.MINOR,
+        this.#point
+      );
+    });
+
     if (!prevPointView || !prevEventForm) {
       render(this.#tripPointView, this.#tripPointsContainer);
       return;

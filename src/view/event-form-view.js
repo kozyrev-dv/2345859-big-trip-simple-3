@@ -1,9 +1,10 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { EVENT_TYPES, EventFormViewMode } from '../moks/const';
+import { EVENT_TYPES, EventFormViewMode, UpdateType, UserAction } from '../moks/const';
 import { uppercaseFirst } from '../framework/utils/string-utils';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import flatpickr from 'flatpickr';
+import { remove } from '../framework/render';
 
 const createDestinationPhotostape = (destination) => destination.pictures.map(
   (picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
@@ -58,7 +59,7 @@ const createEventTypeElementList = (currentEventType, currentPointId, eventTypes
     <label class="event__type-label  event__type-label--${eventType}" for="event-type-${eventType}-${currentPointId}">${uppercaseFirst(eventType)}</label>
   </div>`).join('');
 
-const createFormEditTemplate = (pointState, offersByType, destinations) => {
+const createFormCreateTemplate = (pointState, offersByType, destinations) => {
   const currentTypeOffers = offersByType.find((el) => el.type === pointState.type).offers;
 
   return `
@@ -92,10 +93,10 @@ const createFormEditTemplate = (pointState, offersByType, destinations) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-${pointState.id}">From</label>
-          <input class="event__input  event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}">
+          <input class="event__input  event__input--time event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-${pointState.id}">To</label>
-          <input class="event__input  event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}">
+          <input class="event__input  event__input--time event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -117,42 +118,43 @@ const createFormEditTemplate = (pointState, offersByType, destinations) => {
     </li>`;
 };
 
-const createFormCreateTemplate = (pointState, offersByType, destinations) => {
+const createFormEditTemplate = (pointState, offersByType, destinations) => {
   const currentTypeOffers = offersByType.find((el) => el.type === pointState.type).offers;
 
-  return `<li class="trip-events__item">
-  <form class="event event--edit" action="#" method="post">
-    <header class="event__header">
-      <div class="event__type-wrapper">
-        <label class="event__type  event__type-btn" for="event-type-toggle-${pointState.id}">
-          <span class="visually-hidden">Choose event type</span>
-          <img class="event__type-icon" width="17" height="17" src="img/icons/${pointState.type}.png" alt="Event type icon">
-        </label>
-        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${pointState.id}" type="checkbox">
-        <div class="event__type-list">
-          <fieldset class="event__type-group">
-            <legend class="visually-hidden">Event type</legend>
-            ${createEventTypeElementList(pointState.type, pointState.id)}
-          </fieldset>
+  return `
+  <li class="trip-events__item">
+    <form class="event event--edit" action="#" method="post">
+      <header class="event__header">
+        <div class="event__type-wrapper">
+          <label class="event__type  event__type-btn" for="event-type-toggle-${pointState.id}">
+            <span class="visually-hidden">Choose event type</span>
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${pointState.type}.png" alt="Event type icon">
+          </label>
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${pointState.id}" type="checkbox">
+          <div class="event__type-list">
+            <fieldset class="event__type-group">
+              <legend class="visually-hidden">Event type</legend>
+              ${createEventTypeElementList(pointState.type, pointState.id)}
+            </fieldset>
+          </div>
         </div>
-      </div>
 
-      <div class="event__field-group  event__field-group--destination">
-        <label class="event__label  event__type-output" for="event-destination-${pointState.id}">
-          ${uppercaseFirst(pointState.type)}
-        </label>
-        <input class="event__input  event__input--destination" id="event-destination-${pointState.id}" type="text" name="event-destination" value="${(pointState.destination) ? destinations[pointState.destination].name : ''}" list="destination-list-${pointState.id}">
-        <datalist id="destination-list-${pointState.id}">
-          ${createDestinationOptions(destinations)}
-        </datalist>
-      </div>
+        <div class="event__field-group  event__field-group--destination">
+          <label class="event__label  event__type-output" for="event-destination-${pointState.id}">
+            ${uppercaseFirst(pointState.type)}
+          </label>
+          <input class="event__input  event__input--destination" id="event-destination-${pointState.id}" type="text" name="event-destination" value="${(pointState.destination) ? destinations[pointState.destination].name : ''}" list="destination-list-${pointState.id}">
+          <datalist id="destination-list-${pointState.id}">
+            ${createDestinationOptions(destinations)}
+          </datalist>
+        </div>
 
-      <div class="event__field-group  event__field-group--time">
+        <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-${pointState.id}">From</label>
-          <input class="event__input  event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}">
+          <input class="event__input event__input--time event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-${pointState.id}">To</label>
-          <input class="event__input  event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}">
+          <input class="event__input event__input--time event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -163,15 +165,15 @@ const createFormCreateTemplate = (pointState, offersByType, destinations) => {
           <input class="event__input  event__input--price" id="event-price-${pointState.id}" type="text" name="event-price" value="${pointState.basePrice}">
         </div>
 
-      <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset">Cancel</button>
-    </header>
-    <section class="event__details">
-      ${createOfferSelectors(currentTypeOffers, pointState.checkedOffersIds, pointState.id)}
-      ${createDestinationDescriptionElement(destinations[pointState.destination])}
-    </section>
-  </form>
-</li>`;
+        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+        <button class="event__reset-btn" type="reset">Delete</button>
+      </header>
+      <section class="event__details">
+        ${createOfferSelectors(currentTypeOffers, pointState.checkedOffersIds, pointState.id)}
+        ${createDestinationDescriptionElement(destinations[pointState.destination])}
+      </section>
+    </form>
+  </li>`;
 };
 
 const createTripPointFormViewTemplate = (mode, pointState, offersByType, destinations) => {
@@ -213,11 +215,11 @@ export default class EventFormView extends AbstractStatefulView{
   static parsePointToState = (point) => {
     const actualPoint = point ?? {
       'basePrice' : '',
-      'dateFrom' : undefined,
-      'dateTo' : undefined,
-      'destination': null,
+      'dateFrom' : dayjs().toString(),
+      'dateTo' : dayjs().add(1, 'day').toString(),
+      'destination': 0,
       'id': nanoid(),
-      'offers': null,
+      'offers': [],
       'type': EVENT_TYPES[0]
     };
     const dateFromFormated = dayjs(actualPoint.dateFrom).format('DD/MM/YY HH:mm'); //19/03/19 00:00
@@ -284,6 +286,7 @@ export default class EventFormView extends AbstractStatefulView{
     this.#setDatePickers();
 
     this.setOnFormSubmit(this._callback.submit);
+    this.setOnFormCancel(this._callback.cancel);
 
     this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClicked);
     this.element.querySelector('.event__input--destination').addEventListener('input', this.#onDestinationChanged);
@@ -331,13 +334,31 @@ export default class EventFormView extends AbstractStatefulView{
 
   #onFormSubmit = (evt) => {
     evt.preventDefault();
+    if (this.#mode === EventFormViewMode.CREATE) {
+      this._callback.submit(UserAction.ADD_POINT, UpdateType.MINOR, EventFormView.parseStateToPoint(this._state));
+      return;
+    }
     this._callback.submit(EventFormView.parseStateToPoint(this._state));
+  };
+
+  setOnFormCancel = (callback) => {
+    this._callback.cancel = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onFormCancel);
+  };
+
+  #onFormCancel = (evt) => {
+    evt.preventDefault();
+    this._callback.cancel();
   };
 
   reset = (point) => {
     this.updateElement(
       EventFormView.parsePointToState(point)
     );
+  };
+
+  cancel = () => {
+    remove(this);
   };
 
 }
