@@ -123,12 +123,12 @@ export default class BoardPresenter {
 
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
         this.#tripPointPresenters.get(update.id).setSaving();
         try {
-          BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
+          await BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
         } catch (err) {
           this.#tripPointPresenters.get(update.id).setAborting();
         }
@@ -136,7 +136,7 @@ export default class BoardPresenter {
       case UserAction.ADD_POINT:
         this.#createEventForm.setSaving();
         try {
-          BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
+          await BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
         } catch(err) {
           this.#createEventForm.setAborting();
         }
@@ -144,7 +144,7 @@ export default class BoardPresenter {
       case UserAction.DELETE_POINT:
         this.#tripPointPresenters.get(update.id).setDeleting();
         try {
-          BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
+          await BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
         } catch (err) {
           this.#tripPointPresenters.get(update.id).setAborting();
         }
@@ -190,7 +190,7 @@ export default class BoardPresenter {
       BoardPresenter.#destinationsModel.destinations
     );
     this.#createEventForm.setOnFormSubmit(this.#handleViewAction);
-    this.#createEventForm.setOnFormDeleteClick(this.#onCreateFormCancel);
+    this.#createEventForm.setOnFormCancel(this.#onCreateFormCancel);
     document.body.addEventListener('keydown', this.#onCreateFormKeyDown);
     render(this.#createEventForm, this.#tripPointsContainer, 'afterbegin');
   };

@@ -134,19 +134,13 @@ export default class TripPointPresenter {
 
   setSaving = () => {
     if(this.mode === TripPointViewMode.FORM) {
-      this.#eventFormView.updateElement({
-        isDisabled: true,
-        isSaving: true
-      });
+      this.#eventFormView.setSaving();
     }
   };
 
   setDeleting = () => {
     if(this.mode === TripPointViewMode.FORM) {
-      this.#eventFormView.updateElement({
-        isDisabled: true,
-        osDeleting: true
-      });
+      this.#eventFormView.setDeleting();
     }
   };
 
@@ -157,11 +151,7 @@ export default class TripPointPresenter {
     }
 
     const resetFormState = () => {
-      this.#eventFormView.updateElement({
-        isSaving: false,
-        isDeleting: false,
-        isDisabled: false
-      });
+      this.#eventFormView.setAborting();
     };
     this.#eventFormView.shake(resetFormState);
   };

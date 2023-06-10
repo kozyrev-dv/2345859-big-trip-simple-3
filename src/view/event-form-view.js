@@ -26,9 +26,9 @@ const createDestinationOptions = (destinations) => destinations.map((destination
   `<option value="${destination.name}"></option>`
 ).join('');
 
-const createOfferSelector = (isChecked, offer, eventId) => `
+const createOfferSelector = (isChecked, offer, eventId, isDisabled) => `
   <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" data-raw-id=${offer.id} id="event-offer-${offer.id}-${eventId}" type="checkbox" name="event-offer-${offer.id}" ${isChecked}>
+    <input class="event__offer-checkbox  visually-hidden" data-raw-id=${offer.id} id="event-offer-${offer.id}-${eventId}" type="checkbox" name="event-offer-${offer.id}" ${isChecked} ${isDisabled}>
     <label class="event__offer-label" for="event-offer-${offer.id}-${eventId}">
       <span class="event__offer-title">${offer.title}</span>
       &plus;&euro;&nbsp;
@@ -36,7 +36,7 @@ const createOfferSelector = (isChecked, offer, eventId) => `
     </label>
   </div>`;
 
-const createOfferSelectors = (currentTypeOffers, checkedOffers, eventId) => {
+const createOfferSelectors = (currentTypeOffers, checkedOffers, eventId, isDisabled) => {
   if (currentTypeOffers.length === 0) {
     return '';
   }
@@ -46,7 +46,7 @@ const createOfferSelectors = (currentTypeOffers, checkedOffers, eventId) => {
       <div class="event__available-offers">
   ${currentTypeOffers.map((offer) => {
     const isChecked = checkedOffers.includes(offer.id) ? 'checked' : '';
-    return createOfferSelector(isChecked, offer, eventId);
+    return createOfferSelector(isChecked, offer, eventId, isDisabled);
   }).join('')}
       </div>
     </section>`;
@@ -61,6 +61,8 @@ const createEventTypeElementList = (currentEventType, currentPointId, eventTypes
 const createFormCreateTemplate = (pointState, offersByType, destinations) => {
   const currentTypeOffers = offersByType.find((el) => el.type === pointState.type).offers;
   const destination = destinations.find((dest) => dest.id === pointState.destination);
+  const isDisabledTag = pointState.isDisabled ? 'disabled' : '';
+  const saveText = pointState.isSaving ? 'Saving...' : 'Save';
   return `
   <li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -84,7 +86,7 @@ const createFormCreateTemplate = (pointState, offersByType, destinations) => {
           <label class="event__label  event__type-output" for="event-destination-${pointState.id}">
             ${uppercaseFirst(pointState.type)}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-${pointState.id}" type="text" name="event-destination" value="${(pointState.destination) ? destination.name : ''}" list="destination-list-${pointState.id}">
+          <input class="event__input  event__input--destination" id="event-destination-${pointState.id}" type="text" name="event-destination" value="${(pointState.destination) ? destination.name : ''}" list="destination-list-${pointState.id}" ${isDisabledTag}>
           <datalist id="destination-list-${pointState.id}">
             ${createDestinationOptions(destinations)}
           </datalist>
@@ -92,10 +94,10 @@ const createFormCreateTemplate = (pointState, offersByType, destinations) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-${pointState.id}">From</label>
-          <input class="event__input  event__input--time event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}">
+          <input class="event__input  event__input--time event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}" ${isDisabledTag}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-${pointState.id}">To</label>
-          <input class="event__input  event__input--time event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}">
+          <input class="event__input  event__input--time event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}" ${isDisabledTag}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -103,14 +105,14 @@ const createFormCreateTemplate = (pointState, offersByType, destinations) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${pointState.id}" type="text" name="event-price" value="${pointState.basePrice}">
+          <input class="event__input  event__input--price" id="event-price-${pointState.id}" type="text" name="event-price" value="${pointState.basePrice}" ${isDisabledTag}>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabledTag}>${saveText}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabledTag}>Cancel</button>
       </header>
       <section class="event__details">
-        ${createOfferSelectors(currentTypeOffers, pointState.offers, pointState.id)}
+        ${createOfferSelectors(currentTypeOffers, pointState.offers, pointState.id, pointState.isDisabled)}
         ${createDestinationDescriptionElement(destination)}
       </section>
     </form>
@@ -120,6 +122,9 @@ const createFormCreateTemplate = (pointState, offersByType, destinations) => {
 const createFormEditTemplate = (pointState, offersByType, destinations) => {
   const currentTypeOffers = offersByType.find((el) => el.type === pointState.type).offers;
   const destination = destinations.find((dest) => dest.id === pointState.destination);
+  const isDisabledTag = pointState.isDisabled ? 'disabled' : '';
+  const saveText = pointState.isSaving ? 'Saving...' : 'Save';
+  const deleteText = pointState.isDeleting ? 'Deleting...' : 'Delete';
   return `
   <li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -142,7 +147,7 @@ const createFormEditTemplate = (pointState, offersByType, destinations) => {
           <label class="event__label  event__type-output" for="event-destination-${pointState.id}">
             ${uppercaseFirst(pointState.type)}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-${pointState.id}" type="text" name="event-destination" value="${(pointState.destination) ? destination.name : ''}" list="destination-list-${pointState.id}">
+          <input class="event__input  event__input--destination" id="event-destination-${pointState.id}" type="text" name="event-destination" value="${(pointState.destination) ? destination.name : ''}" list="destination-list-${pointState.id}" ${isDisabledTag}>
           <datalist id="destination-list-${pointState.id}">
             ${createDestinationOptions(destinations)}
           </datalist>
@@ -150,10 +155,10 @@ const createFormEditTemplate = (pointState, offersByType, destinations) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-${pointState.id}">From</label>
-          <input class="event__input event__input--time event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}">
+          <input class="event__input event__input--time event__input--time-start" id="event-start-time-${pointState.id}" type="text" name="event-start-time" value="${pointState.dateFromFormated}" ${isDisabledTag}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-${pointState.id}">To</label>
-          <input class="event__input event__input--time event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}">
+          <input class="event__input event__input--time event__input--time-end" id="event-end-time-${pointState.id}" type="text" name="event-end-time" value="${pointState.dateToFormated}" ${isDisabledTag}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -161,17 +166,17 @@ const createFormEditTemplate = (pointState, offersByType, destinations) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${pointState.id}" type="text" name="event-price" value="${pointState.basePrice}">
+          <input class="event__input  event__input--price" id="event-price-${pointState.id}" type="text" name="event-price" value="${pointState.basePrice}" ${isDisabledTag}>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
-        <button class="event__rollup-btn" type="button">
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabledTag}>${saveText}</button>
+        <button class="event__reset-btn" type="reset" ${isDisabledTag}>${deleteText}</button>
+        <button class="event__rollup-btn" type="button" ${isDisabledTag}>
                     <span class="visually-hidden">Open event</span>
         </button>
       </header>
       <section class="event__details">
-        ${createOfferSelectors(currentTypeOffers, pointState.offers, pointState.id)}
+        ${createOfferSelectors(currentTypeOffers, pointState.offers, pointState.id, pointState.isDisabled)}
         ${createDestinationDescriptionElement(destination)}
       </section>
     </form>
@@ -202,7 +207,7 @@ export default class EventFormView extends AbstractStatefulView{
   #dateToDatepicker = null;
 
   #isDisabledSave = true;
-  #isValidDestination = false;
+  #isValidDestinationInput = false;
   #mode = null;
 
   constructor(mode, point, offersByType, destinations) {
@@ -213,7 +218,7 @@ export default class EventFormView extends AbstractStatefulView{
 
     this.#mode = mode;
     if (Number(this._state.destination)){
-      this.#isValidDestination = destinations.some((dest) => dest.id === point.destination);
+      this.#isValidDestinationInput = destinations.some((dest) => dest.id === point.destination);
     }
     this._restoreHandlers();
   }
@@ -302,7 +307,7 @@ export default class EventFormView extends AbstractStatefulView{
   };
 
   #validateInputs() {
-    this.isDisabledSave = !(this._state.destination && this.#isValidDestination &&
+    this.isDisabledSave = this._state.isDisabled || !(this._state.destination && this.#isValidDestinationInput &&
       dayjs(this._state.dateFrom).isValid() &&
       dayjs(this._state.dateTo).isValid() &&
       Number(this.element.querySelector('.event__input--price').value));
@@ -335,11 +340,9 @@ export default class EventFormView extends AbstractStatefulView{
   #onPriceInput = (evt) => {
     evt.preventDefault();
     this.#validateInputs();
-    if (!this.isDisabledSave) {
-      this._setState({
-        basePrice: this.element.querySelector('.event__input--price').value
-      });
-    }
+    this._setState({
+      basePrice: this.element.querySelector('.event__input--price').value
+    });
   };
 
   #onDateFromPickerClosed = ([dateFrom]) => {
@@ -379,9 +382,9 @@ export default class EventFormView extends AbstractStatefulView{
       this.updateElement({
         destination: newDest.id,
       });
-      this.#isValidDestination = true;
+      this.#isValidDestinationInput = true;
     } else {
-      this.#isValidDestination = false;
+      this.#isValidDestinationInput = false;
     }
 
     this.#validateInputs();
@@ -419,6 +422,28 @@ export default class EventFormView extends AbstractStatefulView{
   #onFormCancel = (evt) => {
     evt.preventDefault();
     this._callback.cancel();
+  };
+
+  setSaving = () => {
+    this.updateElement({
+      isDisabled: true,
+      isSaving: true
+    });
+  };
+
+  setDeleting = () => {
+    this.updateElement({
+      isDisabled: true,
+      isDeleting: true
+    });
+  };
+
+  setAborting = () => {
+    this.updateElement({
+      isSaving: false,
+      isDeleting: false,
+      isDisabled: false
+    });
   };
 
   reset = (point) => {
