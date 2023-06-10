@@ -52,7 +52,7 @@ export default class TripPointPresenter {
     this.#tripPointView = new TripPointsView(
       this.#point,
       BoardPresenter.offersModel.getOffersOfType(this.#point.type),
-      BoardPresenter.destinationsModel.destinations[this.#point.destination]
+      BoardPresenter.destinationsModel.destinations.find((dest) => dest.id === this.#point.destination)
     );
     this.#eventFormView = new EventFormView(
       EventFormViewMode.EDIT,
@@ -72,12 +72,16 @@ export default class TripPointPresenter {
       this.switchViewToItem();
     });
 
-    this.#eventFormView.setOnFormCancel(() => {
+    this.#eventFormView.setOnFormDeleteClick(() => {
       this.#onDataChange(
         UserAction.DELETE_POINT,
         UpdateType.MINOR,
         this.#point
       );
+    });
+
+    this.#eventFormView.setOnFormCancel(() => {
+      this.#cancelFormChanges();
     });
 
     if (!prevPointView || !prevEventForm) {
@@ -112,14 +116,20 @@ export default class TripPointPresenter {
   removePoint() {
     remove(this.#tripPointView);
     remove(this.#eventFormView);
+    this.#tripPointView = null;
+    this.#eventFormView = null;
   }
+
+  #cancelFormChanges = () => {
+    this.#eventFormView.reset(this.#point);
+    this.switchViewToItem();
+    document.body.removeEventListener('keydown', this.#onKeyDown);
+  };
 
   #onKeyDown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#eventFormView.reset(this.#point);
-      this.switchViewToItem();
-      document.body.removeEventListener('keydown', this.#onKeyDown);
+      this.#cancelFormChanges();
     }
   };
 

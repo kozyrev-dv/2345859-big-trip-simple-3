@@ -1,5 +1,11 @@
 import AbstractView from '../framework/view/abstract-view';
-import { FILTER_HEADERS } from '../moks/const.js';
+
+const FILTER_HEADERS = {
+  'future': 'Future',
+  'everything': 'Everything'
+};
+
+const FILTERS = ['future', 'everything'];
 
 const createFilterItemElement = (filter) =>
   `<div class="trip-filters__filter">
@@ -27,9 +33,9 @@ export default class FilterView extends AbstractView{
 
   #filters = null;
 
-  constructor(filters) {
+  constructor() {
     super();
-    this.#filters = filters;
+    this.#filters = FILTERS;
   }
 
   get template() {

@@ -1,5 +1,14 @@
 import AbstractView from '../framework/view/abstract-view';
-import { SORT_HEADERS } from '../moks/const';
+
+const SORT_HEADERS = {
+  'day': 'Day',
+  'event': 'Event',
+  'time': 'Time',
+  'price': 'Price',
+  'offer': 'Offers'
+};
+
+const SORT_TYPES = ['day', 'event', 'time', 'price', 'offer'];
 
 const createSortItemElement = (sortType) => `
   <div class="trip-sort__item  trip-sort__item--${sortType}">
@@ -26,9 +35,9 @@ export default class SortView extends AbstractView{
 
   #sortTypes = null;
 
-  constructor(sortTypes) {
+  constructor() {
     super();
-    this.#sortTypes = sortTypes;
+    this.#sortTypes = SORT_TYPES;
   }
 
   get template() {

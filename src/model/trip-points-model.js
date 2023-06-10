@@ -10,19 +10,6 @@ export default class TripPointsModel extends Observable {
   constructor(tripPointsApiService) {
     super();
     this.#tripPointsApiService = tripPointsApiService;
-
-    // this.#tripPoints = Array.from({length: 20}, (_, index) => {
-    //   const tripPoint = randomTripPoint(index);
-    //   return {
-    //     'basePrice' : tripPoint.base_price,
-    //     'dateFrom' : tripPoint.date_from,
-    //     'dateTo' : tripPoint.date_to,
-    //     'destination': tripPoint.destination,
-    //     'id': tripPoint.id,
-    //     'offers': tripPoint.offers,
-    //     'type': tripPoint.type
-    //   };
-    // });
   }
 
   getPoint = (id) => this.#tripPoints.find((el) => el.id === id);
@@ -60,7 +47,7 @@ export default class TripPointsModel extends Observable {
 
       this._notify(updateType, updatedPoint);
     } catch(err) {
-      throw new Error('Can\'t update tripPoint');
+      throw new Error(`Can't update tripPoint: ${err.stack}`);
     }
 
   };
@@ -76,7 +63,7 @@ export default class TripPointsModel extends Observable {
 
       this._notify(updateType, newPoint);
     } catch(err) {
-      throw new Error('Can\'t add tripPoint');
+      throw new Error(`Can't add tripPoint: ${err.stack}`);
     }
   };
 
@@ -95,7 +82,7 @@ export default class TripPointsModel extends Observable {
       ];
       this._notify(updateType);
     } catch(err) {
-      throw new Error('Can\'t delete point');
+      throw new Error(`Can't delete tripPoint: ${err.stack}`);
     }
   };
 

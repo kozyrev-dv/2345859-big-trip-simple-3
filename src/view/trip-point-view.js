@@ -9,9 +9,13 @@ const createEventOfferElementTemplate = (offer) =>
     <span class="event__offer-price">${offer.price}</span>
   </li>`;
 
+const noOfferSpanElement = () => `<li class="event__offer">
+<span class="event__offer-title">No additional offers</span>
+</li>`;
+
 const createTripPointTemplate = (point, offersOfType, destination) => {
   const date = point.dateFrom.substring(0, point.dateFrom.indexOf('T'));
-  const offersItems = point.offers.map((offerId) => createEventOfferElementTemplate(
+  const offersItems = (point.offers.length === 0) ? noOfferSpanElement() : point.offers.map((offerId) => createEventOfferElementTemplate(
     offersOfType.find((el) => el.id === offerId)
   )).join('');
 
