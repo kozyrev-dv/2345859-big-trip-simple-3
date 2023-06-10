@@ -1,21 +1,17 @@
 import { render, remove } from '../framework/render';
-import TripPointsModel from '../model/trip-points-model';
-import OffersModel from '../model/offers-model';
-import DestinationsModel from '../model/destinations-model';
 import EmptyBoardView from '../view/empty-board-view';
 import TripPointPresenter from './trip-point-presenter';
-import { FilterType, tripPointSortType, UserAction, UpdateType, EventFormViewMode } from '../moks/const';
+import { FilterType, tripPointSortType, UserAction, UpdateType, EventFormViewMode } from '../framework/utils/const';
 import dayjs from 'dayjs';
 import FilterView from '../view/filter-view';
 import SortView from '../view/sort-view';
 import EventFormView from '../view/event-form-view';
-
-const filters = ['future', 'everything'];
-const sortTypes = ['day', 'event', 'time', 'price', 'offer'];
+import UiBlocker from '../framework/ui-blocker/ui-blocker';
 
 export default class BoardPresenter {
 
   #tripPointsContainer = null;
+  #newTripPointButton = null;
 
   static #tripPointsModel = null;
   static #offersModel = null;
@@ -29,6 +25,9 @@ export default class BoardPresenter {
   #currentFilterType = FilterType.EVERYTHING;
 
   #tripPointPresenters = new Map();
+  #initCounter = 0;
+  #isLoading = false;
+  #uiBlocker = new UiBlocker(350, 1500);
 
   static get offersModel() {
     return this.#offersModel;
@@ -38,9 +37,17 @@ export default class BoardPresenter {
     return this.#destinationsModel;
   }
 
-  constructor({tripPointsContainer}) {
+  constructor({tripPointsModel, offersModel, destinationsModel, tripPointsContainer}) {
     this.#tripPointsContainer = tripPointsContainer;
-    document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#onNewEventButtonClick);
+
+    BoardPresenter.#tripPointsModel = tripPointsModel;
+    BoardPresenter.#destinationsModel = destinationsModel;
+    BoardPresenter.#offersModel = offersModel;
+
+    BoardPresenter.#tripPointsModel.addObserver(this.#handleModelEvent);
+    BoardPresenter.#offersModel.addObserver(this.#handleModelEvent);
+    BoardPresenter.#destinationsModel.addObserver(this.#handleModelEvent);
+
   }
 
   static #sortPointsByDay = (a ,b) => {
@@ -62,7 +69,6 @@ export default class BoardPresenter {
     if (a.basePrice < b.basePrice) {
       return 1;
     }
-
     return 0;
   }
 
@@ -83,38 +89,90 @@ export default class BoardPresenter {
     return BoardPresenter.#tripPointsModel.tripPoints;
   }
 
+  get isLoading() {
+    return this.#isLoading;
+  }
+
+  set isLoading(value) {
+    const prevValue = this.#isLoading;
+    this.#isLoading = value;
+    if(!prevValue && this.isLoading) {
+      this.#uiBlocker.block();
+    } else if (!this.isLoading) {
+      this.#uiBlocker.unblock();
+    }
+  }
+
   init = () => {
 
-    BoardPresenter.#tripPointsModel = new TripPointsModel();
-    BoardPresenter.#offersModel = new OffersModel();
-    BoardPresenter.#destinationsModel = new DestinationsModel();
-
-    BoardPresenter.#tripPointsModel.addObserver(this.#handleModelEvent);
-
-    this.#sortView = new SortView(sortTypes);
-    this.#filterView = new FilterView(filters);
+    this.isLoading = true;
+    this.#filterView = new FilterView({
+      onFilterClick: this.#onFilterClick
+    });
+    this.#sortView = new SortView();
 
     this.#renderFilter();
     this.#renderSort();
 
-    this.#renderPoints();
+    this.#newTripPointButton = document.querySelector('.trip-main__event-add-btn');
+    Promise.all([
+      BoardPresenter.#tripPointsModel.init(),
+      BoardPresenter.#offersModel.init(),
+      BoardPresenter.#destinationsModel.init()
+    ]).then(() => {
+      this.#newTripPointButton.addEventListener('click', this.#onNewEventButtonClick);
+    });
 
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #onFilterClick = (filterType) => {
+    this.#currentFilterType = filterType;
+    this.#sortView.changeSort(tripPointSortType.DAY);
+    this.#handleModelEvent(UpdateType.MINOR);
+  };
+
+  #unblockIfInited = () => {
+    if (this.#initCounter >= 3) {
+      this.#isLoading = false;
+      this.#uiBlocker.unblock();
+      return true;
+    }
+    return false;
+  };
+
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
     switch (actionType) {
-      case UserAction.ADD_POINT:
-        BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
-        break;
       case UserAction.UPDATE_POINT:
-        BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
+        this.#tripPointPresenters.get(update.id).setSaving();
+        try {
+          await BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
+        } catch (err) {
+          this.#tripPointPresenters.get(update.id).setAborting();
+        }
+        break;
+      case UserAction.ADD_POINT:
+        this.#createEventForm.setSaving();
+        try {
+          await BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
+          this.#newTripPointButton.disabled = false;
+        } catch(err) {
+          this.#createEventForm.setAborting();
+        }
         break;
       case UserAction.DELETE_POINT:
-        BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
+        this.#tripPointPresenters.get(update.id).setDeleting();
+        try {
+          await BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
+        } catch (err) {
+          this.#tripPointPresenters.get(update.id).setAborting();
+        }
         break;
       default:
         new Error('Unknown user action ', actionType);
     }
+
+    this.#unblockIfInited();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -130,6 +188,12 @@ export default class BoardPresenter {
         this.#clearBoard(true);
         this.#renderPoints();
         break;
+      case UpdateType.INIT:
+        this.#initCounter ++;
+        if (this.#unblockIfInited()) {
+          this.#renderPoints();
+        }
+        break;
       default:
         throw new Error('Unknown update type used');
     }
@@ -137,6 +201,7 @@ export default class BoardPresenter {
 
   #onNewEventButtonClick = (evt) => {
     evt.preventDefault();
+    this.#closeAllForms();
     this.#createEventForm = new EventFormView(
       EventFormViewMode.CREATE,
       null,
@@ -146,23 +211,33 @@ export default class BoardPresenter {
     this.#createEventForm.setOnFormSubmit(this.#handleViewAction);
     this.#createEventForm.setOnFormCancel(this.#onCreateFormCancel);
     document.body.addEventListener('keydown', this.#onCreateFormKeyDown);
+    this.#newTripPointButton.disabled = true;
     render(this.#createEventForm, this.#tripPointsContainer, 'afterbegin');
   };
 
+  #closeAllForms = () => {
+    for(const pres of this.#tripPointPresenters.values()) {
+      pres.switchViewToItem();
+    }
+    this.#cancelEventForm();
+  };
+
   #cancelEventForm = () => {
-    this.#createEventForm.cancel();
+    this.#createEventForm?.cancel();
     this.#createEventForm = null;
     document.body.removeEventListener('keydown', this.#onCreateFormKeyDown);
   };
 
   #onCreateFormCancel = () => {
     this.#cancelEventForm();
+    this.#newTripPointButton.disabled = false;
   };
 
   #onCreateFormKeyDown = (evt) => {
     if(evt.key === 'Escape') {
       evt.preventDefault();
       this.#cancelEventForm();
+      this.#newTripPointButton.disabled = false;
     }
   };
 
@@ -193,7 +268,7 @@ export default class BoardPresenter {
     this.#createEventForm = null;
 
     if (resetSortType) {
-      this.#currentSortType = tripPointSortType.DAY;
+      this.#currentSortType = resetSortType;
     }
   };
 
@@ -210,12 +285,8 @@ export default class BoardPresenter {
         {
           onDataChange: this.#handleViewAction,
           onTripPointClick: () => {
+            this.#closeAllForms();
             tripPointPresenter.switchViewToForm();
-            for (const pres of this.#tripPointPresenters.values()) {
-              if(pres !== tripPointPresenter) {
-                pres.switchViewToItem();
-              }
-            }
           }
         }
       );

@@ -1,10 +1,17 @@
 import AbstractView from '../framework/view/abstract-view';
-import { FILTER_HEADERS } from '../moks/const.js';
+import { FilterType } from '../framework/utils/const';
+
+const FILTER_HEADERS = {
+  'future': 'Future',
+  'everything': 'Everything'
+};
+
+const FILTERS = ['future', 'everything'];
 
 const createFilterItemElement = (filter) =>
   `<div class="trip-filters__filter">
-    <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future">
-    <label class="trip-filters__filter-label" for="filter-future">${FILTER_HEADERS[filter]}</label>
+    <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${filter}" ${filter === 'everything' ? 'checked' : ''}>
+    <label class="trip-filters__filter-label" for="filter-${filter}">${FILTER_HEADERS[filter]}</label>
   </div>`;
 
 const createFilterTemplate = (filters) => {
@@ -26,14 +33,33 @@ const createFilterTemplate = (filters) => {
 export default class FilterView extends AbstractView{
 
   #filters = null;
+  #onFilterClick = null;
 
-  constructor(filters) {
+  constructor({onFilterClick}) {
     super();
-    this.#filters = filters;
+    this.#filters = FILTERS;
+    this.#onFilterClick = onFilterClick;
+    this.element.querySelectorAll('.trip-filters__filter-input').forEach((el) => el.addEventListener('change', this.#onFilterItemClick));
   }
 
   get template() {
     return createFilterTemplate(this.#filters);
   }
+
+  #onFilterItemClick = (evt) => {
+    evt.preventDefault();
+    let filterType = null;
+    switch (evt.target.value) {
+      case 'future':
+        filterType = FilterType.FUTURE;
+        break;
+      case 'everything':
+        filterType = FilterType.EVERYTHING;
+        break;
+      default:
+        throw new Error('Unknown FilterType');
+    }
+    this.#onFilterClick(filterType);
+  };
 
 }

@@ -1,25 +1,29 @@
-import { randomString } from '../framework/utils/random-utils';
+import Observable from '../framework/observable';
+import { UpdateType } from '../framework/utils/const';
 
-export default class DestinationsModel {
+export default class DestinationsModel extends Observable{
 
+  #tripPointApiService = null;
   #destinations = [];
 
-  constructor() {
-    this.#destinations = Array.from({length: 10}, (_, i) => ({
-      'id': i,
-      'description': randomString(10),
-      'name': randomString(10),
-      'pictures': [
-        {
-          'src': 'http://picsum.photos/300/200?r=0.0762563005163317',
-          'description': 'Chamonix parliament building'
-        }
-      ]
-    }));
+  constructor(tripPointApiService) {
+    super();
+    this.#tripPointApiService = tripPointApiService;
   }
 
   get destinations() {
     return this.#destinations;
   }
+
+  init = async () => {
+
+    try {
+      this.#destinations = await this.#tripPointApiService.getDestinations();
+    } catch(err) {
+      this.#destinations = [];
+    }
+    this._notify(UpdateType.INIT);
+
+  };
 
 }

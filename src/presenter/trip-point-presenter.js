@@ -2,7 +2,7 @@ import BoardPresenter from './board-presenter';
 import TripPointsView from '../view/trip-point-view';
 import EventFormView from '../view/event-form-view';
 import { remove, render, replace } from '../framework/render';
-import { UserAction, UpdateType, EventFormViewMode } from '../moks/const';
+import { UserAction, UpdateType, EventFormViewMode } from '../framework/utils/const';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
@@ -52,7 +52,7 @@ export default class TripPointPresenter {
     this.#tripPointView = new TripPointsView(
       this.#point,
       BoardPresenter.offersModel.getOffersOfType(this.#point.type),
-      BoardPresenter.destinationsModel.destinations[this.#point.destination]
+      BoardPresenter.destinationsModel.destinations.find((dest) => dest.id === this.#point.destination)
     );
     this.#eventFormView = new EventFormView(
       EventFormViewMode.EDIT,
@@ -69,15 +69,18 @@ export default class TripPointPresenter {
         UpdateType.MINOR,
         update,
       );
-      this.switchViewToItem();
     });
 
-    this.#eventFormView.setOnFormCancel(() => {
+    this.#eventFormView.setOnFormDeleteClick(() => {
       this.#onDataChange(
         UserAction.DELETE_POINT,
         UpdateType.MINOR,
         this.#point
       );
+    });
+
+    this.#eventFormView.setOnFormCancel(() => {
+      this.#cancelFormChanges();
     });
 
     if (!prevPointView || !prevEventForm) {
@@ -112,15 +115,43 @@ export default class TripPointPresenter {
   removePoint() {
     remove(this.#tripPointView);
     remove(this.#eventFormView);
+    this.#tripPointView = null;
+    this.#eventFormView = null;
   }
+
+  #cancelFormChanges = () => {
+    this.#eventFormView.reset(this.#point);
+    this.switchViewToItem();
+    document.body.removeEventListener('keydown', this.#onKeyDown);
+  };
 
   #onKeyDown = (evt) => {
     if (evt.key === 'Escape') {
       evt.preventDefault();
-      this.#eventFormView.reset(this.#point);
-      this.switchViewToItem();
-      document.body.removeEventListener('keydown', this.#onKeyDown);
+      this.#cancelFormChanges();
     }
+  };
+
+  setSaving = () => {
+    if(this.mode === TripPointViewMode.FORM) {
+      this.#eventFormView.setSaving();
+    }
+  };
+
+  setDeleting = () => {
+    if(this.mode === TripPointViewMode.FORM) {
+      this.#eventFormView.setDeleting();
+    }
+  };
+
+  setAborting = () => {
+    if(this.mode === TripPointViewMode.ITEM) {
+      this.#tripPointView.shake();
+      return;
+    }
+
+    this.#eventFormView.setAborting();
+
   };
 
 }
