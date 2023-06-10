@@ -105,7 +105,6 @@ export default class BoardPresenter {
   init = () => {
 
     this.isLoading = true;
-
     this.#filterView = new FilterView({
       onFilterClick: this.#onFilterClick
     });
