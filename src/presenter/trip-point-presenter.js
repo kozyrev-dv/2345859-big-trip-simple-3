@@ -150,10 +150,8 @@ export default class TripPointPresenter {
       return;
     }
 
-    const resetFormState = () => {
-      this.#eventFormView.setAborting();
-    };
-    this.#eventFormView.shake(resetFormState);
+    this.#eventFormView.setAborting();
+
   };
 
 }

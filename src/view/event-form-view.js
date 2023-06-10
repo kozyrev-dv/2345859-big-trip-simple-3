@@ -317,7 +317,9 @@ export default class EventFormView extends AbstractStatefulView{
     this.#setDatePickers();
 
     this.setOnFormSubmit(this._callback.submit);
-    this.setOnFormDeleteClick(this._callback.delete);
+    if (this.#mode === EventFormViewMode.EDIT) {
+      this.setOnFormDeleteClick(this._callback.delete);
+    }
     this.setOnFormCancel(this._callback.cancel);
 
     this.element.querySelector('.event__type-group').addEventListener('click', this.#onEventTypeClicked);
@@ -417,6 +419,9 @@ export default class EventFormView extends AbstractStatefulView{
   setOnFormCancel = (callback) => {
     this._callback.cancel = callback;
     this.element.querySelector('.event__rollup-btn')?.addEventListener('click', this.#onFormCancel);
+    if (this.#mode === EventFormViewMode.CREATE) {
+      this.element.querySelector('.event__reset-btn').addEventListener('click', this.#onFormCancel);
+    }
   };
 
   #onFormCancel = (evt) => {
@@ -439,11 +444,13 @@ export default class EventFormView extends AbstractStatefulView{
   };
 
   setAborting = () => {
-    this.updateElement({
-      isSaving: false,
-      isDeleting: false,
-      isDisabled: false
-    });
+    this.shake(() =>
+      this.updateElement({
+        isSaving: false,
+        isDeleting: false,
+        isDisabled: false
+      })
+    );
   };
 
   reset = (point) => {
