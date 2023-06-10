@@ -1,4 +1,4 @@
-import { UpdateType } from '../moks/const';
+import { UpdateType } from '../framework/utils/const';
 import Observable from '../framework/observable';
 
 export default class OffersModel extends Observable{

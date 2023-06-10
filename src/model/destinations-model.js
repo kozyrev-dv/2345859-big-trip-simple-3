@@ -1,5 +1,5 @@
 import Observable from '../framework/observable';
-import { UpdateType } from '../moks/const';
+import { UpdateType } from '../framework/utils/const';
 
 export default class DestinationsModel extends Observable{
 

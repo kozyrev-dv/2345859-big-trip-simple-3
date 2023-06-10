@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { EVENT_TYPES, EventFormViewMode, UpdateType, UserAction } from '../moks/const';
+import { EVENT_TYPES, EventFormViewMode, UpdateType, UserAction } from '../framework/utils/const';
 import { uppercaseFirst } from '../framework/utils/string-utils';
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
@@ -286,12 +286,13 @@ export default class EventFormView extends AbstractStatefulView{
   }
 
   #setDatePickers = () => {
+    const minDate = dayjs(this._state.dateFrom).toDate();
     this.#dateFromDatepicker = flatpickr(
       this.element.querySelector('.event__input--time-start'),
       {
         dateFormat: 'd/m/y H:i', //19/03/19 00:00
         enableTime: true,
-        defaultDate: dayjs(this._state.dateFrom).toDate(),
+        defaultDate: minDate,
         onClose: this.#onDateFromPickerClosed
       }
     );
@@ -300,17 +301,21 @@ export default class EventFormView extends AbstractStatefulView{
       {
         dateFormat: 'd/m/y H:i', //19/03/19 00:00
         enableTime: true,
-        defaultDate: dayjs(this._state.dateTo).toDate(),
+        defaultDate: dayjs(minDate).isAfter(dayjs(this._state.dateTo).toDate()) ? minDate : dayjs(this._state.dateTo).toDate(),
+        minDate: minDate,
         onClose: this.#onDateToPickerClosed
       }
     );
   };
 
   #validateInputs() {
+    const priceStr = this.element.querySelector('.event__input--price').value;
+    const price = parseInt(priceStr, 10);
+    const isValidPrice = /^\d+$/.test(priceStr) && price > 0;
     this.isDisabledSave = this._state.isDisabled || !(this._state.destination && this.#isValidDestinationInput &&
       dayjs(this._state.dateFrom).isValid() &&
       dayjs(this._state.dateTo).isValid() &&
-      Number(this.element.querySelector('.event__input--price').value));
+      isValidPrice);
   }
 
   _restoreHandlers = () => {

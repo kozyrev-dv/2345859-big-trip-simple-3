@@ -1,7 +1,7 @@
 import { render, remove } from '../framework/render';
 import EmptyBoardView from '../view/empty-board-view';
 import TripPointPresenter from './trip-point-presenter';
-import { FilterType, tripPointSortType, UserAction, UpdateType, EventFormViewMode } from '../moks/const';
+import { FilterType, tripPointSortType, UserAction, UpdateType, EventFormViewMode } from '../framework/utils/const';
 import dayjs from 'dayjs';
 import FilterView from '../view/filter-view';
 import SortView from '../view/sort-view';
@@ -11,6 +11,7 @@ import UiBlocker from '../framework/ui-blocker/ui-blocker';
 export default class BoardPresenter {
 
   #tripPointsContainer = null;
+  #newTripPointButton = null;
 
   static #tripPointsModel = null;
   static #offersModel = null;
@@ -113,22 +114,34 @@ export default class BoardPresenter {
     this.#renderFilter();
     this.#renderSort();
 
+    this.#newTripPointButton = document.querySelector('.trip-main__event-add-btn');
     Promise.all([
       BoardPresenter.#tripPointsModel.init(),
       BoardPresenter.#offersModel.init(),
       BoardPresenter.#destinationsModel.init()
     ]).then(() => {
-      document.querySelector('.trip-main__event-add-btn').addEventListener('click', this.#onNewEventButtonClick);
+      this.#newTripPointButton.addEventListener('click', this.#onNewEventButtonClick);
     });
 
   };
 
   #onFilterClick = (filterType) => {
     this.#currentFilterType = filterType;
+    this.#sortView.changeSort(tripPointSortType.DAY);
     this.#handleModelEvent(UpdateType.MINOR);
   };
 
+  #unblockIfInited = () => {
+    if (this.#initCounter >= 3) {
+      this.#isLoading = false;
+      this.#uiBlocker.unblock();
+      return true;
+    }
+    return false;
+  };
+
   #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
     switch (actionType) {
       case UserAction.UPDATE_POINT:
         this.#tripPointPresenters.get(update.id).setSaving();
@@ -142,6 +155,7 @@ export default class BoardPresenter {
         this.#createEventForm.setSaving();
         try {
           await BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
+          this.#newTripPointButton.disabled = false;
         } catch(err) {
           this.#createEventForm.setAborting();
         }
@@ -157,6 +171,8 @@ export default class BoardPresenter {
       default:
         new Error('Unknown user action ', actionType);
     }
+
+    this.#unblockIfInited();
   };
 
   #handleModelEvent = (updateType, data) => {
@@ -174,9 +190,7 @@ export default class BoardPresenter {
         break;
       case UpdateType.INIT:
         this.#initCounter ++;
-        if (this.#initCounter >= 3) {
-          this.#isLoading = false;
-          this.#uiBlocker.unblock();
+        if (this.#unblockIfInited()) {
           this.#renderPoints();
         }
         break;
@@ -197,6 +211,7 @@ export default class BoardPresenter {
     this.#createEventForm.setOnFormSubmit(this.#handleViewAction);
     this.#createEventForm.setOnFormCancel(this.#onCreateFormCancel);
     document.body.addEventListener('keydown', this.#onCreateFormKeyDown);
+    this.#newTripPointButton.disabled = true;
     render(this.#createEventForm, this.#tripPointsContainer, 'afterbegin');
   };
 
@@ -215,12 +230,14 @@ export default class BoardPresenter {
 
   #onCreateFormCancel = () => {
     this.#cancelEventForm();
+    this.#newTripPointButton.disabled = false;
   };
 
   #onCreateFormKeyDown = (evt) => {
     if(evt.key === 'Escape') {
       evt.preventDefault();
       this.#cancelEventForm();
+      this.#newTripPointButton.disabled = false;
     }
   };
 

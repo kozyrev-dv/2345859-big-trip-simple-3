@@ -2,7 +2,7 @@ import BoardPresenter from './board-presenter';
 import TripPointsView from '../view/trip-point-view';
 import EventFormView from '../view/event-form-view';
 import { remove, render, replace } from '../framework/render';
-import { UserAction, UpdateType, EventFormViewMode } from '../moks/const';
+import { UserAction, UpdateType, EventFormViewMode } from '../framework/utils/const';
 
 import 'flatpickr/dist/flatpickr.min.css';
 
