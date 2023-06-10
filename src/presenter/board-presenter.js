@@ -68,7 +68,6 @@ export default class BoardPresenter {
     if (a.basePrice < b.basePrice) {
       return 1;
     }
-
     return 0;
   }
 
