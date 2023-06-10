@@ -69,7 +69,6 @@ export default class TripPointPresenter {
         UpdateType.MINOR,
         update,
       );
-      this.switchViewToItem();
     });
 
     this.#eventFormView.setOnFormDeleteClick(() => {
@@ -131,6 +130,40 @@ export default class TripPointPresenter {
       evt.preventDefault();
       this.#cancelFormChanges();
     }
+  };
+
+  setSaving = () => {
+    if(this.mode === TripPointViewMode.FORM) {
+      this.#eventFormView.updateElement({
+        isDisabled: true,
+        isSaving: true
+      });
+    }
+  };
+
+  setDeleting = () => {
+    if(this.mode === TripPointViewMode.FORM) {
+      this.#eventFormView.updateElement({
+        isDisabled: true,
+        osDeleting: true
+      });
+    }
+  };
+
+  setAborting = () => {
+    if(this.mode === TripPointViewMode.ITEM) {
+      this.#tripPointView.shake();
+      return;
+    }
+
+    const resetFormState = () => {
+      this.#eventFormView.updateElement({
+        isSaving: false,
+        isDeleting: false,
+        isDisabled: false
+      });
+    };
+    this.#eventFormView.shake(resetFormState);
   };
 
 }

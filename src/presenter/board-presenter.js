@@ -125,14 +125,29 @@ export default class BoardPresenter {
 
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
-      case UserAction.ADD_POINT:
-        BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
-        break;
       case UserAction.UPDATE_POINT:
-        BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
+        this.#tripPointPresenters.get(update.id).setSaving();
+        try {
+          BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
+        } catch (err) {
+          this.#tripPointPresenters.get(update.id).setAborting();
+        }
+        break;
+      case UserAction.ADD_POINT:
+        this.#createEventForm.setSaving();
+        try {
+          BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
+        } catch(err) {
+          this.#createEventForm.setAborting();
+        }
         break;
       case UserAction.DELETE_POINT:
-        BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
+        this.#tripPointPresenters.get(update.id).setDeleting();
+        try {
+          BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
+        } catch (err) {
+          this.#tripPointPresenters.get(update.id).setAborting();
+        }
         break;
       default:
         new Error('Unknown user action ', actionType);
@@ -167,6 +182,7 @@ export default class BoardPresenter {
 
   #onNewEventButtonClick = (evt) => {
     evt.preventDefault();
+    this.#closeAllForms();
     this.#createEventForm = new EventFormView(
       EventFormViewMode.CREATE,
       null,
@@ -179,8 +195,15 @@ export default class BoardPresenter {
     render(this.#createEventForm, this.#tripPointsContainer, 'afterbegin');
   };
 
+  #closeAllForms = () => {
+    for(const pres of this.#tripPointPresenters.values()) {
+      pres.switchViewToItem();
+    }
+    this.#cancelEventForm();
+  };
+
   #cancelEventForm = () => {
-    this.#createEventForm.cancel();
+    this.#createEventForm?.cancel();
     this.#createEventForm = null;
     document.body.removeEventListener('keydown', this.#onCreateFormKeyDown);
   };
@@ -240,12 +263,8 @@ export default class BoardPresenter {
         {
           onDataChange: this.#handleViewAction,
           onTripPointClick: () => {
+            this.#closeAllForms();
             tripPointPresenter.switchViewToForm();
-            for (const pres of this.#tripPointPresenters.values()) {
-              if(pres !== tripPointPresenter) {
-                pres.switchViewToItem();
-              }
-            }
           }
         }
       );

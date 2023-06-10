@@ -235,6 +235,9 @@ export default class EventFormView extends AbstractStatefulView{
       dateFromFormated: dateFromFormated,
       dateToFormated: dateToFormated,
       offers: checkedOffersIds,
+      isSaving: false,
+      isDeleting: false,
+      isDisabled: false
     };
   };
 
@@ -243,6 +246,9 @@ export default class EventFormView extends AbstractStatefulView{
 
     delete point.dateFromFormated;
     delete point.dateToFormated;
+    delete point.isSaving;
+    delete point.isDeleting;
+    delete point.isDisabled;
 
     return point;
   };
