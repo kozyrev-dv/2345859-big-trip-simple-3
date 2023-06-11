@@ -16,14 +16,15 @@ export default class DestinationsModel extends Observable{
   }
 
   init = async () => {
-
+    let res = true;
     try {
       this.#destinations = await this.#tripPointApiService.getDestinations();
     } catch(err) {
       this.#destinations = [];
+      res = false;
     }
     this._notify(UpdateType.INIT);
-
+    return res;
   };
 
 }

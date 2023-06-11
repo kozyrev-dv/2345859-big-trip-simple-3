@@ -19,13 +19,16 @@ export default class TripPointsModel extends Observable {
   }
 
   init = async () => {
+    let res = true;
     try {
       const points = await this.#tripPointsApiService.getTripPoints();
       this.#tripPoints = points.map(this.#adaptToClient);
     } catch (err) {
       this.#tripPoints = [];
+      res = false;
     }
     this._notify(UpdateType.INIT);
+    return res;
   };
 
   updateTripPoint = async (updateType, update) => {

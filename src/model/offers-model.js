@@ -18,14 +18,15 @@ export default class OffersModel extends Observable{
   }
 
   init = async () => {
-
+    let res = true;
     try {
       this.#offersByType = await this.#tripPointApiService.getOffers();
     } catch(err) {
       this.#offersByType = [];
+      res = false;
     }
     this._notify(UpdateType.INIT);
-
+    return res;
   };
 
 }

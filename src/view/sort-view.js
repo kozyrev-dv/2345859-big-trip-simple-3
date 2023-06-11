@@ -59,4 +59,12 @@ export default class SortView extends AbstractView{
     this._callback.sortTypeChange(evt.target.dataset.sortType);
   };
 
+  block = () => {
+    this.element.querySelectorAll('.trip-sort__input').forEach((el) => {el.disabled = true;});
+  };
+
+  unblock = () => {
+    this.element.querySelectorAll('.trip-sort__input').forEach((el) => {el.disabled = true;});
+  };
+
 }
