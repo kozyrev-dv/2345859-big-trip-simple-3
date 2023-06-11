@@ -62,4 +62,11 @@ export default class FilterView extends AbstractView{
     this.#onFilterClick(filterType);
   };
 
+  block = () => {
+    this.element.querySelectorAll('.trip-filters__filter-input').forEach((el) => {el.disabled = true;});
+  };
+
+  unblock = () => {
+    this.element.querySelectorAll('.trip-filters__filter-input').forEach((el) => {el.disabled = false;});
+  };
 }

@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import FilterView from '../view/filter-view';
 import SortView from '../view/sort-view';
 import EventFormView from '../view/event-form-view';
+import ServerErrorView from '../view/server-error-view';
 import UiBlocker from '../framework/ui-blocker/ui-blocker';
 
 export default class BoardPresenter {
@@ -28,6 +29,9 @@ export default class BoardPresenter {
   #initCounter = 0;
   #isLoading = false;
   #uiBlocker = new UiBlocker(350, 1500);
+
+  #errorStack = [];
+  #isInitedWithNoError = true;
 
   static get offersModel() {
     return this.#offersModel;
@@ -119,10 +123,16 @@ export default class BoardPresenter {
       BoardPresenter.#tripPointsModel.init(),
       BoardPresenter.#offersModel.init(),
       BoardPresenter.#destinationsModel.init()
-    ]).then(() => {
-      this.#newTripPointButton.addEventListener('click', this.#onNewEventButtonClick);
+    ]).then((values) => {
+      if (this.#unblockIfInited()) {
+        if (values.every((res) => res)) {
+          this.#renderPoints();
+          this.#newTripPointButton.addEventListener('click', this.#onNewEventButtonClick);
+        } else {
+          this.#renderErrorMessage();
+        }
+      }
     });
-
   };
 
   #onFilterClick = (filterType) => {
@@ -148,6 +158,7 @@ export default class BoardPresenter {
         try {
           await BoardPresenter.#tripPointsModel.updateTripPoint(updateType, update);
         } catch (err) {
+          this.#errorStack.push(err);
           this.#tripPointPresenters.get(update.id).setAborting();
         }
         break;
@@ -157,6 +168,7 @@ export default class BoardPresenter {
           await BoardPresenter.#tripPointsModel.addTripPoint(updateType, update);
           this.#newTripPointButton.disabled = false;
         } catch(err) {
+          this.#errorStack.push(err);
           this.#createEventForm.setAborting();
         }
         break;
@@ -165,6 +177,7 @@ export default class BoardPresenter {
         try {
           await BoardPresenter.#tripPointsModel.deleteTripPoint(updateType, update);
         } catch (err) {
+          this.#errorStack.push(err);
           this.#tripPointPresenters.get(update.id).setAborting();
         }
         break;
@@ -190,9 +203,6 @@ export default class BoardPresenter {
         break;
       case UpdateType.INIT:
         this.#initCounter ++;
-        if (this.#unblockIfInited()) {
-          this.#renderPoints();
-        }
         break;
       default:
         throw new Error('Unknown update type used');
@@ -213,6 +223,13 @@ export default class BoardPresenter {
     document.body.addEventListener('keydown', this.#onCreateFormKeyDown);
     this.#newTripPointButton.disabled = true;
     render(this.#createEventForm, this.#tripPointsContainer, 'afterbegin');
+  };
+
+  #renderErrorMessage = () => {
+    this.#newTripPointButton.disabled = true;
+    this.#sortView.block();
+    this.#filterView.block();
+    render(new ServerErrorView(), this.#tripPointsContainer);
   };
 
   #closeAllForms = () => {
